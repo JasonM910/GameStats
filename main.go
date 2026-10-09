@@ -15,7 +15,7 @@ import (
 
 func main() {
 	input := flag.String("input", "eventos.json", "archivo JSON de eventos")
-	output := flag.String("output", "partidas.json", "archivo JSON para Scala")
+	output := flag.String("output", "salida/partidas.json", "archivo JSON para Scala")
 	flag.Parse()
 
 	file, err := os.Open(*input)

@@ -1,6 +1,6 @@
 # Contrato Go → Scala, versión 1
 
-Go produce un archivo JSON UTF-8 llamado `partidas.json` por ejecución. Scala
+Go produce un archivo JSON UTF-8 llamado `salida/partidas.json` por ejecución local. Scala
 lo lee después de que Go termine correctamente. Los eventos inválidos se
 informan en stderr de Go y nunca aparecen en este archivo.
 
