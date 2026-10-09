@@ -1,0 +1,54 @@
+name: Go CI/CD
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Test and compile Go
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: '1.26.8'
+          cache: false
+      - name: Test with race detector
+        run: CGO_ENABLED=1 go test -race ./...
+      - name: Check code
+        run: go vet ./...
+      - name: Compile application
+        run: go build -o "$RUNNER_TEMP/gamestats" .
+
+  container:
+    name: Build and check Docker image
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+      - name: Build image
+        run: docker build -t gamestats-go:ci .
+      - name: Run image and prepare deliverables
+        run: |
+          mkdir -p "$RUNNER_TEMP/gamestats-output" "$RUNNER_TEMP/gamestats-artifacts"
+          docker run --rm \
+            --mount "type=bind,source=$RUNNER_TEMP/gamestats-output,target=/output" \
+            gamestats-go:ci -output /output/partidas.json
+          test -s "$RUNNER_TEMP/gamestats-output/partidas.json"
+          docker save gamestats-go:ci -o "$RUNNER_TEMP/gamestats-artifacts/gamestats-go.tar"
+          cp "$RUNNER_TEMP/gamestats-output/partidas.json" "$RUNNER_TEMP/gamestats-artifacts/partidas.json"
+      - name: Upload Docker image and example output
+        uses: actions/upload-artifact@v7
+        with:
+          name: gamestats-go
+          path: ${{ runner.temp }}/gamestats-artifacts/
+          retention-days: 7
+          if-no-files-found: error

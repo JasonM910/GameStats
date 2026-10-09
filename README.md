@@ -37,6 +37,19 @@ otra entrada, monta el archivo o una carpeta adicional y pasa `-input` con su
 ruta dentro del contenedor. Scala podrá leer el mismo archivo cuando ambos
 servicios compartan esa carpeta o un volumen en la integración final.
 
+## CI/CD con GitHub Actions
+
+El flujo [.github/workflows/ci.yml](.github/workflows/ci.yml) se ejecuta en cada
+push, pull request o manualmente desde la pestaña **Actions** de GitHub. Primero
+ejecuta las pruebas Go con detector de carreras, `go vet` y la compilación.
+Después construye la imagen Docker, ejecuta el programa y comprueba que produjo
+`partidas.json`. Si todo pasa, adjunta un artefacto `gamestats-go` con
+`gamestats-go.tar` (imagen Docker) y `partidas.json` (salida de ejemplo).
+
+Para cargar una imagen descargada del artefacto: `docker load -i gamestats-go.tar`.
+El flujo prepara una versión descargable; el despliegue junto con Scala se hará
+cuando esté listo el otro módulo.
+
 La entrada debe ser un arreglo JSON. Cada evento requiere `eventId`, `timestamp`
 en formato RFC3339 (con zona horaria), `gameId`, `gameVersion`, `matchId`,
 `playerId`, `type` y `data` como objeto JSON, aunque esté vacío. Se rechazan
