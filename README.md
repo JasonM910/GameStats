@@ -23,9 +23,10 @@ La entrada debe ser un arreglo JSON. Cada evento requiere `eventId`, `timestamp`
 en formato RFC3339 (con zona horaria), `gameId`, `gameVersion`, `matchId`,
 `playerId`, `type` y `data` como objeto JSON, aunque esté vacío. Se rechazan
 `eventId` duplicados y eventos que asignan un mismo `matchId` a distintos juegos.
-El campo `data` se conserva sin interpretar para admitir datos particulares de
-Pac-Man, Buscaminas u otros juegos. La validación de campos específicos según
-el tipo de evento queda para cuando el equipo cierre ese contrato.
+Para PACMAN y MINESWEEPER también se comprueba que `type` esté definido y que
+`data` contenga exactamente los campos esperados con los tipos correctos. El
+catálogo está en [docs/contrato-scala.md](docs/contrato-scala.md). Go conserva
+`data` para el análisis posterior de Scala.
 
 Cada partida mantiene sus eventos y jugadores en orden de llegada. Las partidas
 se procesan simultáneamente. Al terminar, Go genera `partidas.json` con solo

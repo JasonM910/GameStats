@@ -15,17 +15,18 @@ import (
 func TestWriteFileContract(t *testing.T) {
 	input := `[
 		{"eventId":"E1","timestamp":"2026-10-08T17:00:00-06:00","gameId":"PACMAN","gameVersion":"1.0","matchId":"P1","playerId":"PLAYER1","type":"MATCH_STARTED","data":{}},
-		{"eventId":"E2","timestamp":"2026-10-08T17:00:01-06:00","gameId":"MINESWEEPER","gameVersion":"1.0","matchId":"M1","playerId":"PLAYER2","type":"MATCH_STARTED","data":{"rows":2}},
+		{"eventId":"E2","timestamp":"2026-10-08T17:00:01-06:00","gameId":"MINESWEEPER","gameVersion":"1.0","matchId":"M1","playerId":"PLAYER2","type":"MATCH_STARTED","data":{"rows":2,"columns":3,"mineCount":2,"difficulty":"EASY"}},
 		{"eventId":"BAD","timestamp":"ayer","gameId":"PACMAN","gameVersion":"1.0","matchId":"P1","playerId":"PLAYER1","type":"PELLET_EATEN","data":{"points":10}},
 		{"eventId":"E3","timestamp":"2026-10-08T17:00:02-06:00","gameId":"PACMAN","gameVersion":"1.0","matchId":"P1","playerId":"PLAYER1","type":"PELLET_EATEN","data":{"points":10}},
-		{"eventId":"E4","timestamp":"2026-10-08T17:00:03-06:00","gameId":"MINESWEEPER","gameVersion":"1.0","matchId":"P1","playerId":"PLAYER2","type":"CELL_REVEALED","data":{"row":0,"column":0,"adjacentMines":1}}
+		{"eventId":"E4","timestamp":"2026-10-08T17:00:03-06:00","gameId":"MINESWEEPER","gameVersion":"1.0","matchId":"P1","playerId":"PLAYER2","type":"CELL_REVEALED","data":{"row":0,"column":0,"adjacentMines":1}},
+		{"eventId":"E5","timestamp":"2026-10-08T17:00:04-06:00","gameId":"PACMAN","gameVersion":"1.0","matchId":"P1","playerId":"PLAYER1","type":"PELLET_EATEN","data":{}}
 	]`
 	read, err := events.ReadAndValidate(strings.NewReader(input))
 	if err != nil {
 		t.Fatal(err)
 	}
 	states, rejected := matches.Process(read.Events)
-	if len(read.Rejected) != 1 || len(rejected) != 1 || rejected[0].EventID != "E4" {
+	if len(read.Rejected) != 2 || read.Rejected[1].EventID != "E5" || len(rejected) != 1 || rejected[0].EventID != "E4" {
 		t.Fatalf("rechazos inesperados: lectura=%+v procesamiento=%+v", read.Rejected, rejected)
 	}
 
@@ -62,7 +63,7 @@ func TestWriteFileContract(t *testing.T) {
 	if err := json.Unmarshal(p.Events[1].Data, &payload); err != nil || payload.Points != 10 {
 		t.Fatalf("data no conservado: %+v (%v)", payload, err)
 	}
-	if strings.Contains(string(data), `"BAD"`) || strings.Contains(string(data), `"E4"`) || strings.Contains(string(data), `"Started"`) {
+	if strings.Contains(string(data), `"BAD"`) || strings.Contains(string(data), `"E4"`) || strings.Contains(string(data), `"E5"`) || strings.Contains(string(data), `"Started"`) {
 		t.Fatalf("archivo contiene evento inválido o campos internos: %s", data)
 	}
 }

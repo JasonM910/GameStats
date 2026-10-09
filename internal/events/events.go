@@ -2,6 +2,7 @@
 package events
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -40,8 +41,7 @@ type ReadResult struct {
 	Rejected []RejectedEvent
 }
 
-// Validate comprueba el contrato común. Los campos específicos de cada juego
-// permanecen en data para su interpretación posterior.
+// Validate comprueba el contrato común y los campos data propios del juego y tipo.
 func (e Event) Validate() error {
 	for _, field := range []struct{ name, value string }{
 		{"eventId", e.EventID},
@@ -59,10 +59,11 @@ func (e Event) Validate() error {
 	if _, err := time.Parse(time.RFC3339, e.Timestamp); err != nil {
 		return fmt.Errorf("timestamp debe usar RFC3339: %w", err)
 	}
-	if len(e.Data) == 0 || !json.Valid(e.Data) || e.Data[0] != '{' {
+	data := bytes.TrimSpace(e.Data)
+	if len(data) == 0 || !json.Valid(data) || data[0] != '{' {
 		return fmt.Errorf("data debe ser un objeto JSON (puede estar vacío)")
 	}
-	return nil
+	return validateData(e.GameID, e.Type, e.Data)
 }
 
 // ReadAndValidate acepta un arreglo JSON. Un objeto inválido se registra en
