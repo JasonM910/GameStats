@@ -11,6 +11,7 @@ posición en el arreglo y la causa; no impiden procesar el resto del archivo.
 ```powershell
 go run .
 go run . -input ruta\a\otro-archivo.json
+go run . -input eventos.json -output partidas.json
 go test ./...
 go test -race ./...
 ```
@@ -27,6 +28,8 @@ Pac-Man, Buscaminas u otros juegos. La validación de campos específicos según
 el tipo de evento queda para cuando el equipo cierre ese contrato.
 
 Cada partida mantiene sus eventos y jugadores en orden de llegada. Las partidas
-se procesan simultáneamente, pero todavía no se ordenan por fecha, calculan
-estadísticas ni envían datos a Scala. `Started` y `Finished` indican si se
+se procesan simultáneamente. Al terminar, Go genera `partidas.json` con solo
+eventos válidos para que Scala lo lea. El formato está documentado en
+[docs/contrato-scala.md](docs/contrato-scala.md). Go todavía no ordena los eventos
+por fecha ni calcula estadísticas. `Started` y `Finished` indican si se
 recibieron `MATCH_STARTED` y `MATCH_FINISHED`; no validan el orden de esos eventos.

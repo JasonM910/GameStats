@@ -1,0 +1,633 @@
+{
+  "schemaVersion": 1,
+  "matches": [
+    {
+      "gameId": "MINESWEEPER",
+      "matchId": "M001",
+      "players": [
+        "PLAYER02"
+      ],
+      "events": [
+        {
+          "eventId": "E002",
+          "timestamp": "2026-10-08T17:00:04-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "MATCH_STARTED",
+          "data": {
+            "rows": 2,
+            "columns": 3,
+            "mineCount": 2,
+            "difficulty": "EASY"
+          }
+        },
+        {
+          "eventId": "E004",
+          "timestamp": "2026-10-08T17:00:08-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 0,
+            "column": 0,
+            "adjacentMines": 1
+          }
+        },
+        {
+          "eventId": "E005",
+          "timestamp": "2026-10-08T17:00:10-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "FLAG_PLACED",
+          "data": {
+            "row": 0,
+            "column": 1,
+            "correct": true
+          }
+        },
+        {
+          "eventId": "E007",
+          "timestamp": "2026-10-08T17:00:15-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 0,
+            "column": 2,
+            "adjacentMines": 2
+          }
+        },
+        {
+          "eventId": "E009",
+          "timestamp": "2026-10-08T17:00:21-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "FLAG_PLACED",
+          "data": {
+            "row": 1,
+            "column": 2,
+            "correct": true
+          }
+        },
+        {
+          "eventId": "E011",
+          "timestamp": "2026-10-08T17:00:25-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 1,
+            "column": 0,
+            "adjacentMines": 1
+          }
+        },
+        {
+          "eventId": "E014",
+          "timestamp": "2026-10-08T17:00:42-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 1,
+            "column": 1,
+            "adjacentMines": 2
+          }
+        },
+        {
+          "eventId": "E016",
+          "timestamp": "2026-10-08T17:01:04-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "BOARD_COMPLETED",
+          "data": {
+            "difficulty": "EASY",
+            "durationSeconds": 60
+          }
+        },
+        {
+          "eventId": "E017",
+          "timestamp": "2026-10-08T17:01:04-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M001",
+          "playerId": "PLAYER02",
+          "type": "MATCH_FINISHED",
+          "data": {
+            "result": "WIN",
+            "durationSeconds": 60
+          }
+        }
+      ]
+    },
+    {
+      "gameId": "MINESWEEPER",
+      "matchId": "M002",
+      "players": [
+        "PLAYER02"
+      ],
+      "events": [
+        {
+          "eventId": "E023",
+          "timestamp": "2026-10-08T17:03:05-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M002",
+          "playerId": "PLAYER02",
+          "type": "MATCH_STARTED",
+          "data": {
+            "rows": 2,
+            "columns": 3,
+            "mineCount": 2,
+            "difficulty": "EASY"
+          }
+        },
+        {
+          "eventId": "E025",
+          "timestamp": "2026-10-08T17:03:10-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M002",
+          "playerId": "PLAYER02",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 1,
+            "column": 0,
+            "adjacentMines": 1
+          }
+        },
+        {
+          "eventId": "E027",
+          "timestamp": "2026-10-08T17:03:18-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M002",
+          "playerId": "PLAYER02",
+          "type": "FLAG_PLACED",
+          "data": {
+            "row": 0,
+            "column": 0,
+            "correct": false
+          }
+        },
+        {
+          "eventId": "E029",
+          "timestamp": "2026-10-08T17:03:30-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M002",
+          "playerId": "PLAYER02",
+          "type": "MINE_TRIGGERED",
+          "data": {
+            "row": 1,
+            "column": 2
+          }
+        },
+        {
+          "eventId": "E030",
+          "timestamp": "2026-10-08T17:03:30-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M002",
+          "playerId": "PLAYER02",
+          "type": "MATCH_FINISHED",
+          "data": {
+            "result": "LOSS",
+            "durationSeconds": 25
+          }
+        }
+      ]
+    },
+    {
+      "gameId": "MINESWEEPER",
+      "matchId": "M003",
+      "players": [
+        "PLAYER03"
+      ],
+      "events": [
+        {
+          "eventId": "E034",
+          "timestamp": "2026-10-08T17:05:00-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "MATCH_STARTED",
+          "data": {
+            "rows": 2,
+            "columns": 3,
+            "mineCount": 2,
+            "difficulty": "EASY"
+          }
+        },
+        {
+          "eventId": "E035",
+          "timestamp": "2026-10-08T17:05:10-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "FLAG_PLACED",
+          "data": {
+            "row": 0,
+            "column": 0,
+            "correct": false
+          }
+        },
+        {
+          "eventId": "E036",
+          "timestamp": "2026-10-08T17:05:20-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "FLAG_REMOVED",
+          "data": {
+            "row": 0,
+            "column": 0
+          }
+        },
+        {
+          "eventId": "E037",
+          "timestamp": "2026-10-08T17:05:30-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 0,
+            "column": 0,
+            "adjacentMines": 1
+          }
+        },
+        {
+          "eventId": "E038",
+          "timestamp": "2026-10-08T17:05:40-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "FLAG_PLACED",
+          "data": {
+            "row": 0,
+            "column": 1,
+            "correct": true
+          }
+        },
+        {
+          "eventId": "E039",
+          "timestamp": "2026-10-08T17:05:50-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 0,
+            "column": 2,
+            "adjacentMines": 2
+          }
+        },
+        {
+          "eventId": "E040",
+          "timestamp": "2026-10-08T17:06:00-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 1,
+            "column": 0,
+            "adjacentMines": 1
+          }
+        },
+        {
+          "eventId": "E041",
+          "timestamp": "2026-10-08T17:06:10-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "FLAG_PLACED",
+          "data": {
+            "row": 1,
+            "column": 2,
+            "correct": true
+          }
+        },
+        {
+          "eventId": "E042",
+          "timestamp": "2026-10-08T17:06:20-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "CELL_REVEALED",
+          "data": {
+            "row": 1,
+            "column": 1,
+            "adjacentMines": 2
+          }
+        },
+        {
+          "eventId": "E043",
+          "timestamp": "2026-10-08T17:06:30-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "BOARD_COMPLETED",
+          "data": {
+            "difficulty": "EASY",
+            "durationSeconds": 90
+          }
+        },
+        {
+          "eventId": "E044",
+          "timestamp": "2026-10-08T17:06:30-06:00",
+          "gameId": "MINESWEEPER",
+          "gameVersion": "1.0",
+          "matchId": "M003",
+          "playerId": "PLAYER03",
+          "type": "MATCH_FINISHED",
+          "data": {
+            "result": "WIN",
+            "durationSeconds": 90
+          }
+        }
+      ]
+    },
+    {
+      "gameId": "PACMAN",
+      "matchId": "P001",
+      "players": [
+        "PLAYER01"
+      ],
+      "events": [
+        {
+          "eventId": "E001",
+          "timestamp": "2026-10-08T17:00:00-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "MATCH_STARTED",
+          "data": {}
+        },
+        {
+          "eventId": "E003",
+          "timestamp": "2026-10-08T17:00:05-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "PELLET_EATEN",
+          "data": {
+            "points": 10
+          }
+        },
+        {
+          "eventId": "E006",
+          "timestamp": "2026-10-08T17:00:12-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "PELLET_EATEN",
+          "data": {
+            "points": 10
+          }
+        },
+        {
+          "eventId": "E008",
+          "timestamp": "2026-10-08T17:00:20-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "POWER_PELLET_EATEN",
+          "data": {
+            "points": 50,
+            "powerDurationSeconds": 10
+          }
+        },
+        {
+          "eventId": "E010",
+          "timestamp": "2026-10-08T17:00:23-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "GHOST_EATEN",
+          "data": {
+            "ghost": "BLINKY",
+            "points": 200
+          }
+        },
+        {
+          "eventId": "E012",
+          "timestamp": "2026-10-08T17:00:26-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "GHOST_EATEN",
+          "data": {
+            "ghost": "PINKY",
+            "points": 400
+          }
+        },
+        {
+          "eventId": "E013",
+          "timestamp": "2026-10-08T17:00:35-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "FRUIT_EATEN",
+          "data": {
+            "fruit": "CHERRY",
+            "points": 100
+          }
+        },
+        {
+          "eventId": "E015",
+          "timestamp": "2026-10-08T17:01:00-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "LEVEL_COMPLETED",
+          "data": {
+            "level": 1,
+            "durationSeconds": 60
+          }
+        },
+        {
+          "eventId": "E018",
+          "timestamp": "2026-10-08T17:01:10-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "LIFE_LOST",
+          "data": {
+            "remainingLives": 2,
+            "ghost": "INKY"
+          }
+        },
+        {
+          "eventId": "E019",
+          "timestamp": "2026-10-08T17:01:20-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "PELLET_EATEN",
+          "data": {
+            "points": 10
+          }
+        },
+        {
+          "eventId": "E020",
+          "timestamp": "2026-10-08T17:02:30-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "LEVEL_COMPLETED",
+          "data": {
+            "level": 2,
+            "durationSeconds": 90
+          }
+        },
+        {
+          "eventId": "E021",
+          "timestamp": "2026-10-08T17:02:30-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "MATCH_FINISHED",
+          "data": {
+            "result": "WIN",
+            "durationSeconds": 150
+          }
+        }
+      ]
+    },
+    {
+      "gameId": "PACMAN",
+      "matchId": "P002",
+      "players": [
+        "PLAYER01"
+      ],
+      "events": [
+        {
+          "eventId": "E022",
+          "timestamp": "2026-10-08T17:03:00-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P002",
+          "playerId": "PLAYER01",
+          "type": "MATCH_STARTED",
+          "data": {}
+        },
+        {
+          "eventId": "E024",
+          "timestamp": "2026-10-08T17:03:05-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P002",
+          "playerId": "PLAYER01",
+          "type": "PELLET_EATEN",
+          "data": {
+            "points": 10
+          }
+        },
+        {
+          "eventId": "E026",
+          "timestamp": "2026-10-08T17:03:15-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P002",
+          "playerId": "PLAYER01",
+          "type": "POWER_PELLET_EATEN",
+          "data": {
+            "points": 50,
+            "powerDurationSeconds": 10
+          }
+        },
+        {
+          "eventId": "E028",
+          "timestamp": "2026-10-08T17:03:25-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P002",
+          "playerId": "PLAYER01",
+          "type": "LIFE_LOST",
+          "data": {
+            "remainingLives": 2,
+            "ghost": "BLINKY"
+          }
+        },
+        {
+          "eventId": "E031",
+          "timestamp": "2026-10-08T17:03:45-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P002",
+          "playerId": "PLAYER01",
+          "type": "LIFE_LOST",
+          "data": {
+            "remainingLives": 1,
+            "ghost": "INKY"
+          }
+        },
+        {
+          "eventId": "E032",
+          "timestamp": "2026-10-08T17:04:00-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P002",
+          "playerId": "PLAYER01",
+          "type": "LIFE_LOST",
+          "data": {
+            "remainingLives": 0,
+            "ghost": "CLYDE"
+          }
+        },
+        {
+          "eventId": "E033",
+          "timestamp": "2026-10-08T17:04:00-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P002",
+          "playerId": "PLAYER01",
+          "type": "MATCH_FINISHED",
+          "data": {
+            "result": "LOSS",
+            "durationSeconds": 60
+          }
+        }
+      ]
+    }
+  ]
+}
