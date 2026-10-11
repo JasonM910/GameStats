@@ -2,3 +2,6 @@
 /partidas.json
 /scala/target/
 /scala/project/target/
+.idea/
+.bsp/
+*.iml
