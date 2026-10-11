@@ -1,0 +1,22 @@
+[
+  {
+    "eventId": "DEMO_OK",
+    "timestamp": "2026-10-08T17:00:00-06:00",
+    "gameId": "PACMAN",
+    "gameVersion": "1.0",
+    "matchId": "DEMO",
+    "playerId": "PLAYER01",
+    "type": "MATCH_STARTED",
+    "data": {}
+  },
+  {
+    "eventId": "DEMO_BAD",
+    "timestamp": "fecha-invalida",
+    "gameId": "PACMAN",
+    "gameVersion": "1.0",
+    "matchId": "DEMO",
+    "playerId": "PLAYER01",
+    "type": "PELLET_EATEN",
+    "data": {"points": 10}
+  }
+]

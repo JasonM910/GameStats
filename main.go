@@ -73,8 +73,11 @@ func main() {
 func printReport(input, output string, total int, states map[string]matches.State, rejected []events.RejectedEvent) {
 	fmt.Println("=== GameStats | Go: preparación de eventos ===")
 	fmt.Printf("Entrada: %s\n", input)
-	fmt.Printf("Resumen: %d leídos | %d válidos | %d rechazados | %d partidas\n",
-		total, total-len(rejected), len(rejected), len(states))
+	fmt.Printf("Resumen: %s | %s | %s | %s\n",
+		countLabel(total, "leído", "leídos"),
+		countLabel(total-len(rejected), "válido", "válidos"),
+		countLabel(len(rejected), "rechazado", "rechazados"),
+		countLabel(len(states), "partida", "partidas"))
 	fmt.Printf("Archivo para Scala: %s\n", output)
 	fmt.Println("\nPartidas preparadas")
 	if len(states) == 0 {
@@ -121,4 +124,11 @@ func matchStatus(state matches.State) string {
 	default:
 		return "sin inicio"
 	}
+}
+
+func countLabel(amount int, singular, plural string) string {
+	if amount == 1 {
+		return fmt.Sprintf("%d %s", amount, singular)
+	}
+	return fmt.Sprintf("%d %s", amount, plural)
 }
