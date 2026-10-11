@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"text/tabwriter"
 
 	"gamestats/internal/events"
 	"gamestats/internal/exchange"
@@ -66,27 +67,58 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Eventos leídos: %d | válidos: %d | inválidos: %d\n",
-		result.Total, result.Total-len(rejected), len(rejected))
-	fmt.Printf("Archivo para Scala: %s\n", *output)
+	printReport(*input, *output, result.Total, states, rejected)
+}
+
+func printReport(input, output string, total int, states map[string]matches.State, rejected []events.RejectedEvent) {
+	fmt.Println("=== GameStats | Go: preparación de eventos ===")
+	fmt.Printf("Entrada: %s\n", input)
+	fmt.Printf("Resumen: %d leídos | %d válidos | %d rechazados | %d partidas\n",
+		total, total-len(rejected), len(rejected), len(states))
+	fmt.Printf("Archivo para Scala: %s\n", output)
+	fmt.Println("\nPartidas preparadas")
+	if len(states) == 0 {
+		fmt.Println("  (ninguna)")
+	}
 
 	matchIDs := make([]string, 0, len(states))
 	for matchID := range states {
 		matchIDs = append(matchIDs, matchID)
 	}
 	sort.Strings(matchIDs)
+	table := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	if len(matchIDs) > 0 {
+		fmt.Fprintln(table, "  ID\tJUEGO\tJUGADORES\tEVENTOS\tESTADO")
+	}
 	for _, matchID := range matchIDs {
 		state := states[matchID]
-		ids := make([]string, 0, len(state.Events))
-		for _, event := range state.Events {
-			ids = append(ids, event.EventID)
-		}
-		fmt.Printf("Partida %s (%s): %d eventos válidos | jugadores: %s | inicio: %t | fin: %t [%s]\n",
-			matchID, state.GameID, len(state.Events), strings.Join(state.Players, ", "),
-			state.Started, state.Finished, strings.Join(ids, ", "))
+		fmt.Fprintf(table, "  %s\t%s\t%s\t%d\t%s\n",
+			matchID, state.GameID, strings.Join(state.Players, ", "), len(state.Events), matchStatus(state))
 	}
+	table.Flush()
+
+	if len(rejected) == 0 {
+		return
+	}
+	fmt.Fprintf(os.Stderr, "\nEventos rechazados (%d)\n", len(rejected))
 	for _, item := range rejected {
-		fmt.Fprintf(os.Stderr, "Evento %d (%s) inválido: %s\n",
-			item.Index, item.EventID, item.Reason)
+		id := item.EventID
+		if id == "" {
+			id = "sin eventId"
+		}
+		fmt.Fprintf(os.Stderr, "  #%d [%s] %s\n", item.Index, id, item.Reason)
+	}
+}
+
+func matchStatus(state matches.State) string {
+	switch {
+	case state.Started && state.Finished:
+		return "finalizada"
+	case state.Finished:
+		return "finalizada sin inicio"
+	case state.Started:
+		return "en curso"
+	default:
+		return "sin inicio"
 	}
 }

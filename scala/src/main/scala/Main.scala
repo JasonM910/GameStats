@@ -24,35 +24,9 @@ object Main {
 
       case Right(archivo) =>
         val resultado = Analyzer.analizar(archivo)
-
-        println("--- Estadisticas por Jugador ---")
-        resultado.players.foreach { p =>
-          println(f"  * ${p.playerId}: ${p.matchesPlayed} partidas, ${p.wins} victorias, ${p.losses} derrotas (${p.winrate}%.1f%%)") // Imprime cada jugador con sus estadísticas.
-        }
-
-        println("\n--- Estadisticas por Partida ---")
-        resultado.matches.foreach { m =>
-          println(s"  * ${m.matchId} (${m.gameId}): ${m.result}, ${m.durationSeconds}s, ${m.eventCount} eventos") // Muestra resultado y duración de cada partida.
-        }
-
-        println("\n--- Resumen por Juego ---")
-        resultado.games.foreach { g =>
-          println(f"  * ${g.gameId}: ${g.matches} partidas, ${g.eventCount} eventos, duracion promedio ${g.avgDurationSeconds}%.1f s") // Imprime datos de cada juego.
-        }
-
-        println("\n--- Metricas combinadas ---")
-        resultado.metrics.foreach { m =>
-          println(f"  * ${m.matchId} ${m.playerId} ${m.metric}: ${m.value}%.1f") // Muestra cada métrica calculada.
-        }
-
-        println("\n--- Patrones detectados ---")
-        if (resultado.patterns.isEmpty) println("  (ninguno)") // Indica si no se detectaron patrones.
-        resultado.patterns.foreach { d =>
-          println(s"  * ${d.matchId} ${d.playerId} ${d.pattern}: ${d.description} [${d.startEventId} -> ${d.endEventId}]") // Muestra cada patrón y sus eventos de inicio/fin.
-        }
-
         val salida = resolverSalida(entrada)
         os.write.over(salida, write(resultado, indent = 2), createFolders = true)
+        ConsoleReport.print(entrada, salida, resultado)
     }
   }
 }
