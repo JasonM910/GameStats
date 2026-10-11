@@ -1,10 +1,129 @@
 # GameStats
 
+[![GameStats CI/CD](https://github.com/JasonM910/GameStats/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonM910/GameStats/actions/workflows/ci.yml)
+
 GameStats procesa eventos simulados de Pacman y Buscaminas en dos etapas. Go lee
 `eventos.json`, valida cada evento y agrupa los válidos por partida. Scala lee
 `salida/partidas.json`, calcula estadísticas y patrones, y escribe
 `salida/resultados.json`. Ambos programas terminan después de procesar el archivo;
 no son servidores HTTP.
+
+## Arquitectura
+
+```mermaid
+flowchart LR
+    A["eventos.json<br/>simulador"] --> B["Go<br/>lectura y validación"]
+    B --> C["Goroutine y channel<br/>por matchId"]
+    C --> D["salida/partidas.json<br/>schemaVersion 1"]
+    D --> E["Scala<br/>estadísticas y patrones"]
+    E --> F["salida/resultados.json"]
+```
+
+1. `main.go` abre el arreglo de eventos. `internal/events` convierte cada objeto
+   en `Event`, valida los campos comunes y el `data` del tipo de evento, y
+   rechaza los `eventId` duplicados. Los errores de objetos individuales se
+   informan en stderr; los eventos válidos siguen adelante.
+2. `internal/matches` asigna una goroutine y un channel a cada `matchId`. Solo
+   esa goroutine modifica el estado de la partida: juego, jugadores únicos,
+   eventos en orden de llegada y marcas de inicio y fin. Si un `matchId`
+   aparece con otro juego, el evento se rechaza.
+3. `internal/exchange` ordena las partidas por `matchId`, conserva el orden de
+   sus eventos y escribe `partidas.json` con `schemaVersion: 1`. Primero escribe
+   un archivo temporal y luego lo renombra, para que Scala reciba el archivo
+   completo. El JSON versionado permite ejecutar y revisar cada etapa por
+   separado.
+4. Scala usa `EventLoader` para leer el archivo y comprobar la versión y los
+   timestamps. `Analyzer` calcula los resultados generales; los analizadores
+   de Pacman y Buscaminas producen métricas y patrones específicos. Para
+   reglas temporales ordenan los eventos por `timestamp`. `Main` guarda el
+   análisis en `resultados.json`.
+
+La comunicación es un archivo JSON compartido porque cada programa procesa un
+lote y termina. Docker Compose espera a que Go finalice correctamente antes de
+iniciar Scala. El contrato que comparten ambos módulos se describe a
+continuación.
+
+## Contrato de intercambio Go → Scala
+
+Go genera `salida/partidas.json` como JSON UTF-8. Scala lo lee cuando Go ha
+terminado correctamente. Los eventos inválidos se informan en stderr de Go y
+no aparecen en este archivo. La estructura es:
+
+```json
+{
+  "schemaVersion": 1,
+  "matches": [
+    {
+      "gameId": "PACMAN",
+      "matchId": "P001",
+      "players": ["PLAYER01"],
+      "events": [
+        {
+          "eventId": "E001",
+          "timestamp": "2026-10-08T17:00:00-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "MATCH_STARTED",
+          "data": {}
+        },
+        {
+          "eventId": "E003",
+          "timestamp": "2026-10-08T17:00:05-06:00",
+          "gameId": "PACMAN",
+          "gameVersion": "1.0",
+          "matchId": "P001",
+          "playerId": "PLAYER01",
+          "type": "PELLET_EATEN",
+          "data": { "points": 10 }
+        }
+      ]
+    }
+  ]
+}
+```
+
+- `schemaVersion` vale `1`; Scala rechaza versiones desconocidas.
+- `matches` se ordena por `matchId` y puede estar vacío. Cada partida tiene
+  `gameId`, `matchId`, `players` y `events`.
+- `players` contiene identificadores únicos en orden de primera aparición.
+  `events` conserva el orden de llegada; Scala lo ordena por `timestamp` cuando
+  una regla depende del tiempo.
+- Cada evento conserva `eventId`, `timestamp`, `gameId`, `gameVersion`,
+  `matchId`, `playerId`, `type` y `data`. El `timestamp` usa RFC3339 con zona
+  horaria y `data` siempre es un objeto JSON, incluso si está vacío.
+- Go comprueba los campos obligatorios de `data` y no permite claves extra. No
+  transforma esos valores ni calcula estadísticas. `Started` y `Finished` son
+  marcas internas de Go: Scala las infiere de `MATCH_STARTED` y
+  `MATCH_FINISHED`.
+
+### Catálogo de eventos
+
+Los nombres de juegos y tipos deben escribirse exactamente como aparecen en
+la tabla. `texto` significa cadena no vacía; los enteros deben ser números
+JSON, no cadenas. Los booleanos son `true` o `false`, nunca `null`.
+
+| Juego | `type` | Campos obligatorios de `data` |
+| --- | --- | --- |
+| PACMAN | MATCH_STARTED | Ninguno (`{}`) |
+| PACMAN | PELLET_EATEN | `points`: entero ≥ 0 |
+| PACMAN | POWER_PELLET_EATEN | `points`: entero ≥ 0; `powerDurationSeconds`: entero > 0 |
+| PACMAN | GHOST_EATEN | `ghost`: texto; `points`: entero ≥ 0 |
+| PACMAN | FRUIT_EATEN | `fruit`: texto; `points`: entero ≥ 0 |
+| PACMAN | LIFE_LOST | `remainingLives`: entero ≥ 0; `ghost`: texto |
+| PACMAN | LEVEL_COMPLETED | `level`: entero > 0; `durationSeconds`: entero ≥ 0 |
+| PACMAN | MATCH_FINISHED | `result`: texto; `durationSeconds`: entero ≥ 0 |
+| MINESWEEPER | MATCH_STARTED | `rows`, `columns`: enteros > 0; `mineCount`: entero ≥ 0; `difficulty`: texto |
+| MINESWEEPER | CELL_REVEALED | `row`, `column`, `adjacentMines`: enteros ≥ 0 |
+| MINESWEEPER | FLAG_PLACED | `row`, `column`: enteros ≥ 0; `correct`: booleano |
+| MINESWEEPER | FLAG_REMOVED | `row`, `column`: enteros ≥ 0 |
+| MINESWEEPER | MINE_TRIGGERED | `row`, `column`: enteros ≥ 0 |
+| MINESWEEPER | BOARD_COMPLETED | `difficulty`: texto; `durationSeconds`: entero ≥ 0 |
+| MINESWEEPER | MATCH_FINISHED | `result`: texto; `durationSeconds`: entero ≥ 0 |
+
+La validación comprueba la forma de cada evento. No verifica reglas entre
+eventos, como si una casilla pertenece al tablero de esa partida.
 
 ## Requisitos y ejecución local
 
@@ -27,22 +146,32 @@ Scala escribe `resultados.json` junto al archivo de entrada.
 
 Los eventos inválidos se informan en la salida de error de Go y se excluyen de
 `partidas.json`. Go procesa las partidas mediante goroutines y channels. El
-formato común, las reglas de validación y el catálogo de eventos están en
-[docs/contrato-scala.md](docs/contrato-scala.md).
+formato común, las reglas de validación y el catálogo están en la sección
+[Contrato de intercambio Go → Scala](#contrato-de-intercambio-go--scala).
 
-## Docker
+## Despliegue local con Docker
 
-Con Docker Desktop iniciado, ejecutar desde la raíz:
+El entorno de despliegue elegido para esta versión es un equipo Windows con
+Docker Desktop, contenedores Linux y Docker Compose. El proyecto se ejecuta
+como una tarea por lote; los resultados quedan en la carpeta `salida/` del
+equipo. Desde una copia del repositorio, iniciar Docker Desktop y ejecutar en
+PowerShell desde la raíz:
 
 ```powershell
+New-Item -ItemType Directory -Force salida | Out-Null
 docker compose up --build
-Get-Content -Raw salida/resultados.json
+$resultado = Get-Content -Raw salida/resultados.json | ConvertFrom-Json
+$resultado.matches.Count
+$resultado.patterns.Count
 ```
 
 [compose.yaml](compose.yaml) construye las imágenes de Go y Scala, ejecuta Go
 primero y espera a que termine correctamente antes de iniciar Scala. Ambos
 contenedores comparten la carpeta `salida/` del proyecto. La construcción de la
-imagen Scala ejecuta sus pruebas. Para retirar los contenedores terminados:
+imagen Scala ejecuta sus pruebas. La ejecución termina con dos archivos:
+`salida/partidas.json` y `salida/resultados.json`. Con los datos de ejemplo se
+esperan 5 partidas y 3 patrones; verificar esos números confirma que ambas
+etapas corrieron. Para retirar los contenedores terminados:
 
 ```powershell
 docker compose down
@@ -56,6 +185,11 @@ construir por separado:
 docker build -t gamestats-go .
 docker build -t gamestats-scala ./scala
 ```
+
+Este es el deployment funcional definido para la entrega. El pipeline de
+GitHub Actions compila, prueba y entrega artefactos descargables; no publica el
+sistema en un servidor remoto. Para repetir el despliegue local después de
+actualizar el código, ejecutar de nuevo `docker compose up --build`.
 
 ## Resultados de Scala
 
