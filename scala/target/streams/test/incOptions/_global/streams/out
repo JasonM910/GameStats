@@ -1,0 +1,11 @@
+[debug] Created transactional ClassFileManager with tempDir = C:\Users\rmari\Desktop\TEC\IVSemestre\Lenguajes\proyectoI\GameStats\scala\target\scala-2.13\test-classes.bak
+[debug] About to delete class files:
+[debug] 	AnalyzerSuite.class
+[debug] 	EventLoaderSuite.class
+[debug] We backup class files:
+[debug] 	AnalyzerSuite.class
+[debug] 	EventLoaderSuite.class
+[debug] Registering generated classes:
+[debug] 	EventLoaderSuite.class
+[debug] 	AnalyzerSuite.class
+[debug] Removing the temporary directory used for backing up class files: C:\Users\rmari\Desktop\TEC\IVSemestre\Lenguajes\proyectoI\GameStats\scala\target\scala-2.13\test-classes.bak

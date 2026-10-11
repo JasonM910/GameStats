@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuite hostname="Pau" name="AnalyzerSuite" tests="20" errors="0" failures="0" skipped="0" time="0.206" timestamp="2026-10-10T20:35:38">
+          <properties>
+      <property name="java.specification.version" value="21"/><property name="sun.cpu.isalist" value="amd64"/><property name="sun.jnu.encoding" value="Cp1252"/><property name="sun.arch.data.model" value="64"/><property name="sbt.supershell" value="false"/><property name="java.vendor.url" value="https://adoptium.net/"/><property name="sun.boot.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin"/><property name="sun.java.command" value="C:/Users/rmari/AppData/Roaming/JetBrains/IntelliJIdea2026.2/plugins/Scala/launcher/sbt-launch.jar early(addPluginSbtFile=&quot;&quot;&quot;C:/Users/rmari/AppData/Local/Temp/idea13202171948029425758.sbt&quot;&quot;&quot;) idea-shell"/><property name="jdk.debug" value="release"/><property name="java.specification.vendor" value="Oracle Corporation"/><property name="java.version.date" value="2025-07-15"/><property name="java.home" value="C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot"/><property name="file.separator" value="\"/><property name="java.vm.compressedOopsMode" value="32-bit"/><property name="line.separator" value="
+"/><property name="java.vm.specification.vendor" value="Oracle Corporation"/><property name="java.specification.name" value="Java Platform API Specification"/><property name="user.script" value=""/><property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/><property name="java.runtime.version" value="21.0.8+9-LTS"/><property name="user.name" value="rmari"/><property name="log4j.ignoreTCL" value="true"/><property name="file.encoding" value="UTF-8"/><property name="jnidispatch.path" value="C:\Users\rmari\AppData\Local\Temp\jna-108625469\jna16515544655480462417.dll"/><property name="java.vendor.version" value="Temurin-21.0.8+9"/><property name="jna.loaded" value="true"/><property name="java.io.tmpdir" value="C:\Users\rmari\AppData\Local\Temp\"/><property name="java.version" value="21.0.8"/><property name="java.vm.specification.name" value="Java Virtual Machine Specification"/><property name="sun.os.patch.level" value=""/><property name="native.encoding" value="Cp1252"/><property name="java.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin;C:\Program Files (x86)\Common Files\Oracle\Java\java8path;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files\dotnet\;C:\Program Files\nodejs\;C:\Program Files\MongoDB\Server\8.3\bin;C:\Program Files\Go\bin;C:\Program Files\swipl\bin;C:\Users\rmari\AppData\Local\Programs\Python\Python312\Scripts\;C:\Users\rmari\AppData\Local\Programs\Python\Python312\;C:\Users\rmari\AppData\Local\Programs\Python\Launcher\;C:\Users\rmari\AppData\Local\Microsoft\WindowsApps;C:\Users\rmari\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\rmari\AppData\Local\GitHubDesktop\bin;C:\msys64\ucrt64\bin;C:\Users\rmari\.dotnet\tools;C:\Program Files\Java\jdk-21\bin;C:\Users\rmari\AppData\Roaming\npm;C:\Users\rmari\go\bin;C:\Users\rmari\AppData\Local\Programs\DockerDesktop\resources\bin;C:\ghcup\bin;."/><property name="stderr.encoding" value="cp850"/><property name="java.vendor" value="Eclipse Adoptium"/><property name="sun.io.unicode.encoding" value="UnicodeLittle"/><property name="java.class.path" value="C:/Users/rmari/AppData/Roaming/JetBrains/IntelliJIdea2026.2/plugins/Scala/launcher/sbt-launch.jar"/><property name="java.vm.vendor" value="Eclipse Adoptium"/><property name="separate.prod.test.sources.enabled" value="true"/><property name="user.variant" value=""/><property name="jline.shutdownhook" value="false"/><property name="user.timezone" value="America/Costa_Rica"/><property name="java.vm.specification.version" value="21"/><property name="os.name" value="Windows 11"/><property name="sun.java.launcher" value="SUN_STANDARD"/><property name="user.country" value="CR"/><property name="sun.cpu.endian" value="little"/><property name="user.home" value="C:\Users\rmari"/><property name="user.language" value="es"/><property name="sbt.ipcsocket.tmpdir" value="C:\Users\rmari\AppData\Local\Temp\.sbt2066dc1c\ipcsocket"/><property name="swoval.tmpdir" value="C:\Users\rmari\AppData\Local\Temp\.sbt2066dc1c\swoval"/><property name="jline.esc.timeout" value="0"/><property name="stdout.encoding" value="cp850"/><property name="path.separator" value=";"/><property name="os.version" value="10.0"/><property name="jna.nosys" value="true"/><property name="java.runtime.name" value="OpenJDK Runtime Environment"/><property name="sbt.log.noformat" value="true"/><property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/><property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/><property name="user.dir" value="C:\Users\rmari\Desktop\TEC\IVSemestre\Lenguajes\proyectoI\GameStats\scala"/><property name="os.arch" value="amd64"/><property name="grouping.with.qualified.names.enabled" value="true"/><property name="idea.managed" value="true"/><property name="jdk.console" value="java.base"/><property name="java.vm.info" value="mixed mode, sharing"/><property name="java.vm.version" value="21.0.8+9-LTS"/><property name="java.class.version" value="65.0"/>
+    </properties>
+          <testcase classname="AnalyzerSuite" name="winrate: 2 victorias de 3 partidas = 66.67%" time="0.126">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="jugador sin partidas finalizadas tiene winrate 0 (sin dividir entre cero)" time="0.001">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="lista vacía de eventos produce resultados vacíos" time="0.009">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="MATCH_FINISHED sin campo 'result' no lanza excepción y no cuenta como partida" time="0.002">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="'data' que no es un objeto JSON no rompe el análisis" time="0.004">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="partida sin MATCH_FINISHED se reporta como UNFINISHED con duración 0" time="0.001">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="duración promedio por juego ignora partidas sin finalizar" time="0.008">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="Pac-Man: totalPoints suma 4 tipos de evento y pointsPerMinute usa la duración" time="0.016">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="Pac-Man: sin MATCH_FINISHED no hay pointsPerMinute" time="0.001">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="POWER_PELLET_COMBO: 2 fantasmas dentro de la ventana del power pellet" time="0.009">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="POWER_PELLET_COMBO: no se detecta con un solo fantasma o fuera de la ventana" time="0.003">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="POWER_PELLET_COMBO: funciona aunque los eventos lleguen desordenados" time="0.002">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="COMEBACK: perder una vida y luego ganar" time="0.004">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="COMEBACK: no se detecta si se pierde la partida o si nunca se perdió una vida" time="0.001">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="COMEBACK: una victoria ANTERIOR a la pérdida de vida no cuenta" time="0.001">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="Buscaminas: flagAccuracyPercent y cellsRevealed" time="0.008">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="Buscaminas: sin banderas no hay flagAccuracyPercent (evita dividir entre cero)" time="0.001">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="FLAG_CORRECTED: bandera incorrecta retirada de la misma celda" time="0.004">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="FLAG_CORRECTED: no se detecta con otra celda, con bandera correcta o sin retirar" time="0.002">
+                      
+                    </testcase><testcase classname="AnalyzerSuite" name="un juego sin analizador registrado no produce métricas ni patrones, pero sí estadísticas generales" time="0.003">
+                      
+                    </testcase>
+          <system-out><![CDATA[]]></system-out>
+          <system-err><![CDATA[]]></system-err>
+        </testsuite>

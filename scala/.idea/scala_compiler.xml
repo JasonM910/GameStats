@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <option name="separateProdTestSources" value="true" />
+    <profile name="sbt 1" modules="gamestats-scala,gamestats-scala.main,gamestats-scala.test,scala_3937,scala_3937.main,scala_3937.test" />
+  </component>
+</project>
