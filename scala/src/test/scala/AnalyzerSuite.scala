@@ -79,6 +79,7 @@ class AnalyzerSuite extends FunSuite { // Suite de pruebas para verificar el ana
     val p3 = partida("PACMAN", "P3", "A", List(ev("E3", 30, "PACMAN", "P3", "A", "MATCH_STARTED")))
     val g = Analyzer.resumenPorJuego(List(p1, p2, p3)).head
     assertEquals(g.matches, 3)
+    assertEquals(g.eventCount, 3)
     assertEqualsDouble(g.avgDurationSeconds, 75.0, 0.0001)
   }
 

@@ -56,7 +56,8 @@ informan en stderr de Go y nunca aparecen en este archivo.
   Scala puede inferirlos de `MATCH_STARTED` y `MATCH_FINISHED`.
 
 Para usar otra ruta de salida, ejecutar `go run . -output ruta/al/archivo.json`.
-En Docker, ambos servicios podrán montar un volumen compartido con ese archivo.
+En Docker Compose, ambos servicios comparten la carpeta `salida/`: Go escribe
+`partidas.json` y Scala la lee antes de producir `resultados.json`.
 
 ## Catálogo definitivo de eventos
 

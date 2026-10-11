@@ -1,4 +1,4 @@
-name: Go CI/CD
+name: GameStats CI/CD
 
 on:
   push:
@@ -28,27 +28,48 @@ jobs:
         run: go build -o "$RUNNER_TEMP/gamestats" .
 
   container:
-    name: Build and check Docker image
+    name: Test Scala and run Go to Scala
     needs: verify
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v7
-      - name: Build image
+      - name: Build Go image
         run: docker build -t gamestats-go:ci .
-      - name: Run image and prepare deliverables
+      - name: Build Scala image and run Scala tests
+        run: docker build -t gamestats-scala:ci ./scala
+      - name: Run the complete flow and prepare deliverables
         run: |
           mkdir -p "$RUNNER_TEMP/gamestats-output" "$RUNNER_TEMP/gamestats-artifacts"
           docker run --rm \
             --mount "type=bind,source=$RUNNER_TEMP/gamestats-output,target=/output" \
             gamestats-go:ci -output /output/partidas.json
           test -s "$RUNNER_TEMP/gamestats-output/partidas.json"
+          docker run --rm \
+            --mount "type=bind,source=$RUNNER_TEMP/gamestats-output,target=/output" \
+            gamestats-scala:ci
+          test -s "$RUNNER_TEMP/gamestats-output/resultados.json"
+          python3 - "$RUNNER_TEMP/gamestats-output/partidas.json" "$RUNNER_TEMP/gamestats-output/resultados.json" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as source:
+              partidas = json.load(source)
+          with open(sys.argv[2], encoding="utf-8") as source:
+              resultados = json.load(source)
+
+          assert partidas["schemaVersion"] == resultados["schemaVersion"] == 1
+          assert len(partidas["matches"]) == len(resultados["matches"]) > 0
+          assert resultados["players"] and resultados["games"]
+          assert resultados["metrics"] and resultados["patterns"]
+          PY
           docker save gamestats-go:ci -o "$RUNNER_TEMP/gamestats-artifacts/gamestats-go.tar"
           cp "$RUNNER_TEMP/gamestats-output/partidas.json" "$RUNNER_TEMP/gamestats-artifacts/partidas.json"
-      - name: Upload Docker image and example output
+          cp "$RUNNER_TEMP/gamestats-output/resultados.json" "$RUNNER_TEMP/gamestats-artifacts/resultados.json"
+      - name: Upload Go image and example outputs
         uses: actions/upload-artifact@v7
         with:
-          name: gamestats-go
+          name: gamestats
           path: ${{ runner.temp }}/gamestats-artifacts/
           retention-days: 7
           if-no-files-found: error

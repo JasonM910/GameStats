@@ -1,7 +1,0 @@
-[debug] > Exec(reload test, None, None)
-[error] Expected whitespace character
-[error] Expected 'plugins'
-[error] Expected 'return'
-[error] reload test
-[error]        ^
-[debug] > Exec(idea-shell, None, None)

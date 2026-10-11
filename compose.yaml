@@ -1,0 +1,17 @@
+services:
+  go:
+    build: .
+    command: ["-output", "/output/partidas.json"]
+    volumes:
+      - ./salida:/output
+
+  scala:
+    build: ./scala
+    depends_on:
+      go:
+        condition: service_completed_successfully
+    environment:
+      GAMESTATS_INPUT: /output/partidas.json
+      GAMESTATS_OUTPUT: /output/resultados.json
+    volumes:
+      - ./salida:/output

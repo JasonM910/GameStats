@@ -1,4 +1,0 @@
-[error] C:\Users\rmari\Desktop\TEC\IVSemestre\Lenguajes\proyectoI\GameStats\scala\src\main\scala\Analyzer.scala:50:18: invalid escape '\v' not one of [\b, \t, \n, \f, \r, \\, \", \', \uxxxx] at index 1 in " \vert{} Data cruda:". Use \\ for literal \.
-[error]       println(s"Jugador: ${evento.playerId} | Juego: ${evento.gameId} \vert{} Data cruda:${evento.data}")
-[error]                  ^
-[error] one error found

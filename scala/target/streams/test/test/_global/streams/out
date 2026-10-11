@@ -1,7 +1,0 @@
-[debug] Running TaskDef(AnalyzerSuite, CustomFingerprint{suite='munit.Suite'}, false, [SuiteSelector])
-[debug] Running TaskDef(EventLoaderSuite, CustomFingerprint{suite='munit.Suite'}, false, [SuiteSelector])
-[debug] Summary for munit not available.
-[info] Passed: Total 25, Failed 0, Errors 0, Passed 25
-[debug] Passed tests:
-[debug] 	EventLoaderSuite
-[debug] 	AnalyzerSuite

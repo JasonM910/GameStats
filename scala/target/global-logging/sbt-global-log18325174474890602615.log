@@ -1,5 +1,0 @@
-[debug] > Exec(run, None, None)
-[debug] Evaluating tasks: Compile / run
-[debug] Running task... Cancel: Signal, check cycles: false, forcegc: true
-[success] Total time: 1 s, completed 10 oct 2026 19:54:18
-[debug] > Exec(idea-shell, None, None)
