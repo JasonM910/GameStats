@@ -8,21 +8,32 @@ object Analyzer {
       val total = resultados.length
       val victorias = resultados.count(_ == "WIN")
       val derrotas = resultados.count(_ == "LOSS")
+      val empates = resultados.count(_ == "DRAW")
       val winrate = if (total == 0) 0.0 else victorias * 100.0 / total
-      PlayerStats(jugador, total, victorias, derrotas, winrate)
+      PlayerStats(jugador, total, victorias, derrotas, empates, winrate)
     }
   }
 
   def estadisticasPorPartida(partidas: List[MatchData]): List[MatchStats] =
     partidas.map { p =>
-      val fin = p.events.find(_.`type` == "MATCH_FINISHED")
+      val finales = p.events.filter(_.`type` == "MATCH_FINISHED")
+      val porJugador = finales
+        .flatMap(e => EventData.str(e, "result").map(PlayerResult(e.playerId, _)))
+        .sortBy(_.playerId)
+      // Un solo resultado compartido por todos, o "DECIDED" cuando hay ganador y perdedor
+      val resumen = porJugador.map(_.result).distinct match {
+        case Nil         => "UNFINISHED"
+        case List(unico) => unico
+        case _           => "DECIDED"
+      }
       MatchStats(
         matchId = p.matchId,
         gameId = p.gameId,
         players = p.players,
         eventCount = p.events.length,
-        result = fin.flatMap(EventData.str(_, "result")).getOrElse("UNFINISHED"),
-        durationSeconds = fin.flatMap(EventData.num(_, "durationSeconds")).map(_.toInt).getOrElse(0)
+        result = resumen,
+        durationSeconds = finales.flatMap(EventData.num(_, "durationSeconds")).headOption.map(_.toInt).getOrElse(0),
+        results = porJugador
       )
     }
 

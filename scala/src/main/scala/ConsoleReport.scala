@@ -11,6 +11,8 @@ object ConsoleReport {
   private def resultLabel(result: String): String = result match {
     case "WIN"        => "victoria"
     case "LOSS"       => "derrota"
+    case "DRAW"       => "empate"
+    case "DECIDED"    => "con ganador"
     case "UNFINISHED" => "sin terminar"
     case other        => other
   }
@@ -20,12 +22,20 @@ object ConsoleReport {
     case "pointsPerMinute"     => "Puntos por minuto"
     case "flagAccuracyPercent" => "Precisión de banderas"
     case "cellsRevealed"       => "Casillas reveladas"
+    case "movesPlayed"         => "Jugadas realizadas"
+    case "avgThinkTimeSeconds" => "Tiempo medio de reflexión (s)"
+    case "capturedMaterial"    => "Material capturado"
+    case "checksGiven"         => "Jaques dados"
+    case "pairsFound"          => "Parejas encontradas"
+    case "matchAccuracyPercent" => "Precisión de parejas"
+    case "timeUsedPercent"     => "Tiempo usado del límite"
     case other                 => other
   }
 
   private def metricValue(metric: MetricResult): String = metric.metric match {
-    case "flagAccuracyPercent" => f"${metric.value}%.1f %%"
-    case "totalPoints" | "cellsRevealed" => f"${metric.value}%.0f"
+    case "flagAccuracyPercent" | "matchAccuracyPercent" | "timeUsedPercent" => f"${metric.value}%.1f %%"
+    case "totalPoints" | "cellsRevealed" | "movesPlayed" | "capturedMaterial" | "checksGiven" | "pairsFound" =>
+      f"${metric.value}%.0f"
     case _ => f"${metric.value}%.1f"
   }
 
@@ -40,7 +50,10 @@ object ConsoleReport {
     if (result.matches.isEmpty) println("  (ninguna)")
     result.matches.foreach { m =>
       val duration = if (m.result == "UNFINISHED") "--" else s"${m.durationSeconds} s"
-      println(s"  ${m.matchId} (${m.gameId})  ${resultLabel(m.result)}  |  $duration  |  " +
+      val detalle =
+        if (m.result == "DECIDED") m.results.map(r => s"${r.playerId} ${resultLabel(r.result)}").mkString(" (", ", ", ")")
+        else ""
+      println(s"  ${m.matchId} (${m.gameId})  ${resultLabel(m.result)}$detalle  |  $duration  |  " +
         counted(m.eventCount, "evento", "eventos"))
     }
 
@@ -50,6 +63,7 @@ object ConsoleReport {
       println(s"  ${p.playerId}: ${counted(p.matchesPlayed, "partida", "partidas")} | " +
         s"${counted(p.wins, "victoria", "victorias")} | " +
         s"${counted(p.losses, "derrota", "derrotas")} | " +
+        s"${counted(p.draws, "empate", "empates")} | " +
         f"${p.winrate}%.1f%% de victorias")
     }
 

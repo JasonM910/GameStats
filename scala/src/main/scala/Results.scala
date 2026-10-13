@@ -6,19 +6,26 @@ case class PlayerStats(
                         matchesPlayed: Int, // Partidas finalizadas jugadas por este jugador.
                         wins: Int, // Número de victorias.
                         losses: Int, // Número de derrotas.
-                        winrate: Double // porcentaje 0-100
+                        draws: Int, // Número de empates.
+                        winrate: Double // porcentaje de victorias sobre partidas finalizadas, 0-100
                       )
 object PlayerStats { implicit val rw: ReadWriter[PlayerStats] = macroRW }
 
+// Resultado de un jugador en una partida
+case class PlayerResult(playerId: String, result: String)
+object PlayerResult { implicit val rw: ReadWriter[PlayerResult] = macroRW }
+
 // Estadística agregada por partida.
-// result: "WIN", "LOSS" o "UNFINISHED" (si no hay MATCH_FINISHED); durationSeconds = 0 si no terminó.
+// result: el resultado común si todos los jugadores coinciden ("WIN", "LOSS", "DRAW"), "DECIDED" si hubo
+// ganador y perdedor, o "UNFINISHED" si no hay MATCH_FINISHED. durationSeconds = 0 si no terminó.
 case class MatchStats(
                        matchId: String, // Identificador de la partida.
                        gameId: String, // Juego al que pertenece.
                        players: List[String], // Jugadores participantes.
                        eventCount: Int, // Número de eventos en la partida.
-                       result: String, // "WIN", "LOSS" o "UNFINISHED".
-                       durationSeconds: Int // Duración de la partida en segundos.
+                       result: String, // Resultado de la partida.
+                       durationSeconds: Int, // Duración de la partida en segundos.
+                       results: List[PlayerResult] // Resultado de cada jugador.
                      )
 object MatchStats { implicit val rw: ReadWriter[MatchStats] = macroRW }
 

@@ -6,7 +6,7 @@ trait GameAnalyzer { // Define la interfaz común que debe implementar cualquier
 }
 
 object GameAnalyzers { // Contenedor de todos los analizadores disponibles en el sistema.
-  val all: List[GameAnalyzer] = List(PacmanAnalyzer, MinesweeperAnalyzer)
+  val all: List[GameAnalyzer] = List(PacmanAnalyzer, MinesweeperAnalyzer, ChessAnalyzer, MemoryAnalyzer)
   val byGame: Map[String, GameAnalyzer] = all.map(a => a.gameId -> a).toMap
 }
 
@@ -101,4 +101,112 @@ object MinesweeperAnalyzer extends GameAnalyzer {
         }
     }
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+object ChessAnalyzer extends GameAnalyzer {
+  val gameId = "CHESS"
+
+  // Valor convencional de cada pieza, para medir el material capturado
+  private val valorPieza = Map("PAWN" -> 1, "KNIGHT" -> 3, "BISHOP" -> 3, "ROOK" -> 5, "QUEEN" -> 9, "KING" -> 0)
+
+  // Combina MOVE_PLAYED (jugadas y tiempo de reflexión), PIECE_CAPTURED (material) y CHECK_GIVEN
+  def metrics(partida: MatchData): List[MetricResult] =
+    ordenados(partida).groupBy(_.playerId).toList.sortBy(_._1).flatMap { case (jugador, eventos) =>
+      def metrica(nombre: String, valor: Double) = MetricResult(gameId, partida.matchId, jugador, nombre, valor)
+
+      val jugadas = eventos.filter(_.`type` == "MOVE_PLAYED")
+      val tiempos = jugadas.flatMap(EventData.num(_, "thinkTimeSeconds"))
+      val material = eventos
+        .filter(_.`type` == "PIECE_CAPTURED")
+        .flatMap(EventData.str(_, "capturedPiece"))
+        .map(pieza => valorPieza.getOrElse(pieza, 0))
+        .sum
+      val jaques = eventos.count(_.`type` == "CHECK_GIVEN")
+      val promedio =
+        if (tiempos.isEmpty) Nil
+        else List(metrica("avgThinkTimeSeconds", tiempos.sum / tiempos.length))
+
+      List(metrica("movesPlayed", jugadas.length.toDouble)) ++ promedio ++
+        List(metrica("capturedMaterial", material.toDouble), metrica("checksGiven", jaques.toDouble))
+    }
+
+  // Patrón: una misma jugada (mismo ply) captura una pieza, da jaque y termina en jaque mate
+  def patterns(partida: MatchData): List[PatternDetection] =
+    ordenados(partida).groupBy(_.playerId).toList.sortBy(_._1).flatMap { case (jugador, eventos) =>
+      eventos.filter(_.`type` == "CHECKMATE").flatMap { mate =>
+        EventData.num(mate, "ply").toList.flatMap { ply =>
+          def mismaJugada(e: GameEvent) = EventData.num(e, "ply").contains(ply)
+          val captura = eventos.find(e => e.`type` == "PIECE_CAPTURED" && mismaJugada(e))
+          val jaque = eventos.exists(e => e.`type` == "CHECK_GIVEN" && mismaJugada(e))
+          captura.filter(_ => jaque).map { c =>
+            PatternDetection(gameId, partida.matchId, jugador, "CAPTURE_CHECKMATE",
+              s"Jaque mate con captura en la jugada ${ply.toInt}", c.eventId, mate.eventId)
+          }.toList
+        }
+      }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
+object MemoryAnalyzer extends GameAnalyzer {
+  val gameId = "MEMORY"
+
+  // Combina PAIR_MATCHED y PAIR_MISMATCHED (precisión) con MATCH_STARTED y MATCH_FINISHED (uso del tiempo)
+  def metrics(partida: MatchData): List[MetricResult] =
+    ordenados(partida).groupBy(_.playerId).toList.sortBy(_._1).flatMap { case (jugador, eventos) =>
+      def metrica(nombre: String, valor: Double) = MetricResult(gameId, partida.matchId, jugador, nombre, valor)
+
+      val aciertos = eventos.count(_.`type` == "PAIR_MATCHED")
+      val intentos = aciertos + eventos.count(_.`type` == "PAIR_MISMATCHED")
+      val limite = eventos.find(_.`type` == "MATCH_STARTED").flatMap(EventData.num(_, "timeLimitSeconds"))
+      val duracion = eventos.find(_.`type` == "MATCH_FINISHED").flatMap(EventData.num(_, "durationSeconds"))
+
+      val precision =
+        if (intentos == 0) Nil
+        else List(metrica("matchAccuracyPercent", aciertos * 100.0 / intentos))
+      val tiempo = (limite, duracion) match {
+        case (Some(l), Some(d)) if l > 0 => List(metrica("timeUsedPercent", d * 100.0 / l))
+        case _                           => Nil
+      }
+
+      List(metrica("pairsFound", aciertos.toDouble)) ++ precision ++ tiempo
+    }
+
+  def patterns(partida: MatchData): List[PatternDetection] =
+    ordenados(partida).groupBy(_.playerId).toList.sortBy(_._1).flatMap { case (jugador, eventos) =>
+      rachaDeAciertos(partida, jugador, eventos) ++ cartaRecordada(partida, jugador, eventos)
+    }
+
+  // Patrón 1: dos o más parejas encontradas en intentos consecutivos, sin fallos entre ellas
+  private def rachaDeAciertos(partida: MatchData, jugador: String, eventos: List[GameEvent]): List[PatternDetection] = {
+    val intentos = eventos.filter(e => e.`type` == "PAIR_MATCHED" || e.`type` == "PAIR_MISMATCHED")
+    val (cerradas, abierta) = intentos.foldLeft((List.empty[List[GameEvent]], List.empty[GameEvent])) {
+      case ((acc, actual), e) =>
+        if (e.`type` == "PAIR_MATCHED") (acc, actual :+ e)
+        else (if (actual.isEmpty) acc else acc :+ actual, List.empty[GameEvent])
+    }
+    val rachas = (if (abierta.isEmpty) cerradas else cerradas :+ abierta).filter(_.length >= 2)
+    rachas.map { racha =>
+      PatternDetection(gameId, partida.matchId, jugador, "MATCH_STREAK",
+        s"${racha.length} parejas seguidas sin fallar", racha.head.eventId, racha.last.eventId)
+    }
+  }
+
+  private def cartasDe(e: GameEvent): List[String] =
+    List("firstCardId", "secondCardId").flatMap(EventData.str(e, _))
+
+  // Patrón 2: una pareja se forma con una carta que ya se había visto en un intento fallido anterior
+  private def cartaRecordada(partida: MatchData, jugador: String, eventos: List[GameEvent]): List[PatternDetection] =
+    eventos.filter(_.`type` == "PAIR_MATCHED").flatMap { acierto =>
+      val cartas = cartasDe(acierto)
+      val fallosPrevios = eventos.takeWhile(_.eventId != acierto.eventId).filter(_.`type` == "PAIR_MISMATCHED")
+      fallosPrevios
+        .find(fallo => cartasDe(fallo).exists(c => cartas.contains(c)))
+        .map { fallo =>
+          PatternDetection(gameId, partida.matchId, jugador, "REMEMBERED_CARD",
+            "Pareja formada con una carta vista antes en un intento fallido", fallo.eventId, acierto.eventId)
+        }
+        .toList
+    }
 }
