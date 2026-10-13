@@ -34,7 +34,7 @@ flowchart LR
    separado.
 4. Scala usa `EventLoader` para leer el archivo y comprobar la versión y los
    timestamps. `Analyzer` calcula los resultados generales de los cuatro juegos;
-   los analizadores de Pacman y Buscaminas producen métricas y patrones específicos. Para
+   cada juego tiene un analizador que produce métricas y patrones específicos. Para
    reglas temporales ordenan los eventos por `timestamp`. `Main` guarda el
    análisis en `resultados.json`.
 
@@ -192,7 +192,7 @@ primero y espera a que termine correctamente antes de iniciar Scala. Ambos
 contenedores comparten la carpeta `salida/` del proyecto. La construcción de la
 imagen Scala ejecuta sus pruebas. La ejecución termina con dos archivos:
 `salida/partidas.json` y `salida/resultados.json`. Con los datos de ejemplo se
-esperan 9 partidas y 3 patrones; verificar esos números confirma que ambas
+esperan 9 partidas, 32 métricas y 8 patrones; verificar esos números confirma que ambas
 etapas corrieron. Para retirar los contenedores terminados:
 
 ```powershell
@@ -224,8 +224,8 @@ colecciones con `filter`, `map` y `flatMap`, y agrega valores con `foldLeft` y
 
 | Sección | Cálculo |
 | --- | --- |
-| `players` | Partidas finalizadas, victorias, derrotas y `winrate = victorias / partidas finalizadas × 100`. Si no hay partidas finalizadas, el porcentaje es 0. |
-| `matches` | Juego, jugadores, cantidad de eventos, resultado y duración de cada partida. Sin `MATCH_FINISHED`, el resultado es `UNFINISHED` y la duración es 0. |
+| `players` | Partidas completas por jugador, victorias, derrotas, empates (`draws`) y `winrate = victorias / partidas completas × 100`. Un empate cuenta como partida, pero no como victoria o derrota. Una partida incompleta no suma resultados a ningún jugador. Si no hay resultados, el porcentaje es 0. |
+| `matches` | Juego, jugadores, cantidad de eventos, duración y `results` con el resultado de cada jugador. `result` vale `DECIDED` cuando hay resultados distintos, `DRAW` si todos empatan, o el resultado común si coinciden. Si falta el resultado de algún participante, vale `UNFINISHED` y la duración es 0. |
 | `games` | Partidas y eventos por juego; duración media de las partidas finalizadas. Si ninguna terminó, el promedio es 0. |
 
 Las métricas específicas se calculan por jugador y partida:
@@ -236,6 +236,13 @@ Las métricas específicas se calculan por jugador y partida:
 | Pacman | `pointsPerMinute` | `totalPoints / durationSeconds × 60`; se emite solo si `MATCH_FINISHED` tiene duración mayor que 0. |
 | Buscaminas | `flagAccuracyPercent` | Banderas con `correct: true` divididas entre todas las `FLAG_PLACED`, por 100; se emite solo si hubo banderas. |
 | Buscaminas | `cellsRevealed` | Cantidad de eventos `CELL_REVEALED`. |
+| Ajedrez | `movesPlayed` | Número de eventos `MOVE_PLAYED` del jugador. |
+| Ajedrez | `avgThinkTimeSeconds` | Promedio de `thinkTimeSeconds` en sus jugadas; se omite si no hay jugadas. |
+| Ajedrez | `capturedMaterial` | Suma de valores de piezas capturadas: peón 1, caballo/alfil 3, torre 5, dama 9. |
+| Ajedrez | `checksGiven` | Número de eventos `CHECK_GIVEN` del jugador. |
+| Memoria | `pairsFound` | Número de eventos `PAIR_MATCHED` del jugador. |
+| Memoria | `matchAccuracyPercent` | Parejas acertadas entre todos los intentos (`PAIR_MATCHED` y `PAIR_MISMATCHED`), por 100; se omite si no hubo intentos. |
+| Memoria | `timeUsedPercent` | `durationSeconds / timeLimitSeconds × 100`; se emite cuando hay inicio y fin con límite positivo. |
 
 Los patrones se buscan por jugador dentro de cada partida, ordenando los eventos
 por `timestamp`:
@@ -245,15 +252,17 @@ por `timestamp`:
 | `POWER_PELLET_COMBO` | En Pacman, después de `POWER_PELLET_EATEN` se comen al menos dos fantasmas dentro de `powerDurationSeconds`. |
 | `COMEBACK` | En Pacman, ocurre `LIFE_LOST` y posteriormente `MATCH_FINISHED` con resultado `WIN`. |
 | `FLAG_CORRECTED` | En Buscaminas, se coloca una bandera incorrecta y luego se retira de la misma casilla. |
+| `CAPTURE_CHECKMATE` | En Ajedrez, un jugador captura una pieza, da jaque y hace jaque mate en ese orden durante el mismo `ply`. |
+| `MATCH_STREAK` | En Memoria, un jugador encuentra dos o más parejas en intentos consecutivos sin fallar entre ellas. |
+| `REMEMBERED_CARD` | En Memoria, se forma una pareja usando una carta vista antes en un intento fallido. |
 
 Cada patrón incluye los identificadores del evento inicial y final. Un juego
 sin analizador específico conserva las estadísticas generales, pero no produce
 métricas ni patrones propios.
 
-La parte de Scala todavía tiene analizadores específicos solo para Pacman y
-Buscaminas. Ajedrez y Memoria aparecen en las estadísticas generales de
-`players`, `matches` y `games`; sus métricas y patrones específicos quedan
-pendientes en el módulo Scala.
+Los cuatro juegos producen estadísticas generales y métricas propias. Los datos
+de ejemplo incluyen una partida multijugador de Ajedrez con ganador y perdedor,
+otra en empate y dos partidas de Memoria con resultados diferentes.
 
 ## Pruebas e integración continua
 

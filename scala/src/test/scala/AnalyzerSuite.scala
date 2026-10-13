@@ -26,7 +26,8 @@ class AnalyzerSuite extends FunSuite { // Suite de pruebas para verificar el ana
       fin("E2", 20, "PACMAN", "P2", "A", "LOSS", 10),
       fin("E3", 30, "PACMAN", "P3", "A", "WIN", 10)
     )
-    val a = Analyzer.estadisticasPorJugador(eventos).find(_.playerId == "A").get
+    val partidas = eventos.map(e => partida("PACMAN", e.matchId, "A", List(e)))
+    val a = Analyzer.estadisticasPorJugador(partidas).find(_.playerId == "A").get
     assertEquals(a.matchesPlayed, 3)
     assertEquals(a.wins, 2)
     assertEquals(a.losses, 1)
@@ -35,7 +36,7 @@ class AnalyzerSuite extends FunSuite { // Suite de pruebas para verificar el ana
 
   test("jugador sin partidas finalizadas tiene winrate 0 (sin dividir entre cero)") {
     val eventos = List(ev("E1", 0, "PACMAN", "P1", "A", "MATCH_STARTED"))
-    val a = Analyzer.estadisticasPorJugador(eventos).head
+    val a = Analyzer.estadisticasPorJugador(List(partida("PACMAN", "P1", "A", eventos))).head
     assertEquals(a.matchesPlayed, 0)
     assertEqualsDouble(a.winrate, 0.0, 0.0001)
   }
@@ -53,7 +54,7 @@ class AnalyzerSuite extends FunSuite { // Suite de pruebas para verificar el ana
   // ---------- Entradas con errores ----------
   test("MATCH_FINISHED sin campo 'result' no lanza excepcion y no cuenta como partida") {
     val malo = ev("E1", 10, "PACMAN", "P1", "A", "MATCH_FINISHED", ujson.Obj("durationSeconds" -> 5))
-    val a = Analyzer.estadisticasPorJugador(List(malo)).head
+    val a = Analyzer.estadisticasPorJugador(List(partida("PACMAN", "P1", "A", List(malo)))).head
     assertEquals(a.matchesPlayed, 0)
   }
 
@@ -191,11 +192,11 @@ class AnalyzerSuite extends FunSuite { // Suite de pruebas para verificar el ana
   }
   // ---------- Genericidad ----------
   test("un juego sin analizador registrado no produce metricas ni patrones, pero si estadisticas generales") {
-    val p = partida("CHESS", "C1", "A", List(fin("E1", 10, "CHESS", "C1", "A", "WIN", 300)))
+    val p = partida("OTHER", "C1", "A", List(fin("E1", 10, "OTHER", "C1", "A", "WIN", 300)))
     val r = Analyzer.analizar(PartidasFile(1, List(p)))
     assertEquals(r.metrics, Nil)
     assertEquals(r.patterns, Nil)
     assertEquals(r.players.head.wins, 1)
-    assertEquals(r.games.head.gameId, "CHESS")
+    assertEquals(r.games.head.gameId, "OTHER")
   }
 }

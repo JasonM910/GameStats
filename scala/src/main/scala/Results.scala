@@ -3,7 +3,7 @@ import upickle.default._
 // Estadística agregada por jugador
 case class PlayerStats(
                         playerId: String, // Identificador del jugador.
-                        matchesPlayed: Int, // Partidas finalizadas jugadas por este jugador.
+                        matchesPlayed: Int, // Partidas completas con resultado de este jugador.
                         wins: Int, // Número de victorias.
                         losses: Int, // Número de derrotas.
                         draws: Int, // Número de empates.

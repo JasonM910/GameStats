@@ -134,12 +134,12 @@ object ChessAnalyzer extends GameAnalyzer {
   // Patrón: una misma jugada (mismo ply) captura una pieza, da jaque y termina en jaque mate
   def patterns(partida: MatchData): List[PatternDetection] =
     ordenados(partida).groupBy(_.playerId).toList.sortBy(_._1).flatMap { case (jugador, eventos) =>
-      eventos.filter(_.`type` == "CHECKMATE").flatMap { mate =>
+      eventos.zipWithIndex.filter(_._1.`type` == "CHECKMATE").flatMap { case (mate, indiceMate) =>
         EventData.num(mate, "ply").toList.flatMap { ply =>
           def mismaJugada(e: GameEvent) = EventData.num(e, "ply").contains(ply)
-          val captura = eventos.find(e => e.`type` == "PIECE_CAPTURED" && mismaJugada(e))
-          val jaque = eventos.exists(e => e.`type` == "CHECK_GIVEN" && mismaJugada(e))
-          captura.filter(_ => jaque).map { c =>
+          val anteriores = eventos.take(indiceMate)
+          val indiceJaque = anteriores.lastIndexWhere(e => e.`type` == "CHECK_GIVEN" && mismaJugada(e))
+          anteriores.take(indiceJaque).find(e => e.`type` == "PIECE_CAPTURED" && mismaJugada(e)).map { c =>
             PatternDetection(gameId, partida.matchId, jugador, "CAPTURE_CHECKMATE",
               s"Jaque mate con captura en la jugada ${ply.toInt}", c.eventId, mate.eventId)
           }.toList

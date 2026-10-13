@@ -67,7 +67,13 @@ jobs:
           assert by_id["MEM001"]["players"] == ["PLAYER08"]
           assert by_id["MEM002"]["players"] == ["PLAYER09"]
           assert resultados["players"] and resultados["games"]
-          assert resultados["metrics"] and resultados["patterns"]
+          assert len(resultados["metrics"]) == 32
+          assert len(resultados["patterns"]) == 8
+          chess = next(m for m in resultados["matches"] if m["matchId"] == "C001")
+          assert chess["result"] == "DECIDED"
+          assert chess["results"] == [{"playerId": "PLAYER04", "result": "WIN"}, {"playerId": "PLAYER05", "result": "LOSS"}]
+          assert {p["pattern"] for p in resultados["patterns"] if p["gameId"] == "CHESS"} == {"CAPTURE_CHECKMATE"}
+          assert {p["pattern"] for p in resultados["patterns"] if p["gameId"] == "MEMORY"} == {"MATCH_STREAK", "REMEMBERED_CARD"}
           PY
           docker save gamestats-go:ci -o "$RUNNER_TEMP/gamestats-artifacts/gamestats-go.tar"
           cp "$RUNNER_TEMP/gamestats-output/partidas.json" "$RUNNER_TEMP/gamestats-artifacts/partidas.json"

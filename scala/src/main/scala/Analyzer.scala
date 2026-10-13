@@ -1,10 +1,10 @@
 object Analyzer {
 
-  def estadisticasPorJugador(eventos: List[GameEvent]): List[PlayerStats] = {
-    val finalesPorJugador = eventos.filter(_.`type` == "MATCH_FINISHED").groupBy(_.playerId)
+  def estadisticasPorJugador(partidas: List[MatchData]): List[PlayerStats] = {
+    val completas = estadisticasPorPartida(partidas).filter(_.result != "UNFINISHED")
 
-    eventos.map(_.playerId).distinct.sorted.map { jugador =>
-      val resultados = finalesPorJugador.getOrElse(jugador, Nil).flatMap(EventData.str(_, "result"))
+    partidas.flatMap(_.players).distinct.sorted.map { jugador =>
+      val resultados = completas.flatMap(_.results.find(_.playerId == jugador).map(_.result))
       val total = resultados.length
       val victorias = resultados.count(_ == "WIN")
       val derrotas = resultados.count(_ == "LOSS")
@@ -20,9 +20,9 @@ object Analyzer {
       val porJugador = finales
         .flatMap(e => EventData.str(e, "result").map(PlayerResult(e.playerId, _)))
         .sortBy(_.playerId)
-      // Un solo resultado compartido por todos, o "DECIDED" cuando hay ganador y perdedor
-      val resumen = porJugador.map(_.result).distinct match {
-        case Nil         => "UNFINISHED"
+      val completa = p.players.nonEmpty && p.players.forall(id => porJugador.exists(_.playerId == id))
+      // En partidas multijugador debe existir un resultado para cada participante.
+      val resumen = if (!completa) "UNFINISHED" else porJugador.map(_.result).distinct match {
         case List(unico) => unico
         case _           => "DECIDED"
       }
@@ -32,7 +32,7 @@ object Analyzer {
         players = p.players,
         eventCount = p.events.length,
         result = resumen,
-        durationSeconds = finales.flatMap(EventData.num(_, "durationSeconds")).headOption.map(_.toInt).getOrElse(0),
+        durationSeconds = if (completa) finales.flatMap(EventData.num(_, "durationSeconds")).headOption.map(_.toInt).getOrElse(0) else 0,
         results = porJugador
       )
     }
@@ -57,7 +57,7 @@ object Analyzer {
   def analizar(archivo: PartidasFile): AnalysisResult =
     AnalysisResult(
       schemaVersion = archivo.schemaVersion,
-      players = estadisticasPorJugador(archivo.allEvents),
+      players = estadisticasPorJugador(archivo.matches),
       matches = estadisticasPorPartida(archivo.matches),
       games = resumenPorJuego(archivo.matches),
       metrics = metricasCombinadas(archivo.matches),
