@@ -91,7 +91,11 @@ func TestSampleMatches(t *testing.T) {
 		t.Fatal(err)
 	}
 	states, rejected := Process(read.Events)
-	if len(rejected) != 0 || len(states) != 5 || len(states["P001"].Events) != 12 || len(states["M003"].Events) != 11 {
+	if len(rejected) != 0 || len(states) != 9 || len(states["P001"].Events) != 12 || len(states["M003"].Events) != 11 ||
+		len(states["C001"].Events) != 14 || !reflect.DeepEqual(states["C001"].Players, []string{"PLAYER04", "PLAYER05"}) ||
+		len(states["C002"].Events) != 10 || !reflect.DeepEqual(states["C002"].Players, []string{"PLAYER06", "PLAYER07"}) ||
+		len(states["MEM001"].Events) != 11 || !reflect.DeepEqual(states["MEM001"].Players, []string{"PLAYER08"}) ||
+		len(states["MEM002"].Events) != 9 || !reflect.DeepEqual(states["MEM002"].Players, []string{"PLAYER09"}) {
 		t.Fatalf("partidas de ejemplo inesperadas: %+v; rechazados: %+v", states, rejected)
 	}
 }

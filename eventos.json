@@ -581,5 +581,628 @@
       "result": "WIN",
       "durationSeconds": 90
     }
+  },
+  {
+    "eventId": "E045",
+    "timestamp": "2026-10-08T17:07:00-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "MATCH_STARTED",
+    "data": {
+      "side": "WHITE"
+    }
+  },
+  {
+    "eventId": "E046",
+    "timestamp": "2026-10-08T17:07:00-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER05",
+    "type": "MATCH_STARTED",
+    "data": {
+      "side": "BLACK"
+    }
+  },
+  {
+    "eventId": "E047",
+    "timestamp": "2026-10-08T17:07:02-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER06",
+    "type": "MATCH_STARTED",
+    "data": {
+      "side": "WHITE"
+    }
+  },
+  {
+    "eventId": "E048",
+    "timestamp": "2026-10-08T17:07:02-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER07",
+    "type": "MATCH_STARTED",
+    "data": {
+      "side": "BLACK"
+    }
+  },
+  {
+    "eventId": "E049",
+    "timestamp": "2026-10-08T17:07:05-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 1,
+      "piece": "PAWN",
+      "from": "e2",
+      "to": "e4",
+      "thinkTimeSeconds": 5
+    }
+  },
+  {
+    "eventId": "E050",
+    "timestamp": "2026-10-08T17:07:08-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER06",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 1,
+      "piece": "PAWN",
+      "from": "d2",
+      "to": "d4",
+      "thinkTimeSeconds": 6
+    }
+  },
+  {
+    "eventId": "E051",
+    "timestamp": "2026-10-08T17:07:10-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER05",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 2,
+      "piece": "PAWN",
+      "from": "e7",
+      "to": "e5",
+      "thinkTimeSeconds": 5
+    }
+  },
+  {
+    "eventId": "E052",
+    "timestamp": "2026-10-08T17:07:15-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER07",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 2,
+      "piece": "PAWN",
+      "from": "d7",
+      "to": "d5",
+      "thinkTimeSeconds": 7
+    }
+  },
+  {
+    "eventId": "E053",
+    "timestamp": "2026-10-08T17:07:18-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 3,
+      "piece": "BISHOP",
+      "from": "f1",
+      "to": "c4",
+      "thinkTimeSeconds": 8
+    }
+  },
+  {
+    "eventId": "E054",
+    "timestamp": "2026-10-08T17:07:21-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER06",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 3,
+      "piece": "PAWN",
+      "from": "c2",
+      "to": "c4",
+      "thinkTimeSeconds": 6
+    }
+  },
+  {
+    "eventId": "E055",
+    "timestamp": "2026-10-08T17:07:25-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER05",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 4,
+      "piece": "KNIGHT",
+      "from": "b8",
+      "to": "c6",
+      "thinkTimeSeconds": 7
+    }
+  },
+  {
+    "eventId": "E056",
+    "timestamp": "2026-10-08T17:07:28-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER07",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 4,
+      "piece": "PAWN",
+      "from": "e7",
+      "to": "e6",
+      "thinkTimeSeconds": 6
+    }
+  },
+  {
+    "eventId": "E057",
+    "timestamp": "2026-10-08T17:07:34-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 5,
+      "piece": "QUEEN",
+      "from": "d1",
+      "to": "h5",
+      "thinkTimeSeconds": 9
+    }
+  },
+  {
+    "eventId": "E058",
+    "timestamp": "2026-10-08T17:07:36-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER06",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 5,
+      "piece": "KNIGHT",
+      "from": "g1",
+      "to": "f3",
+      "thinkTimeSeconds": 8
+    }
+  },
+  {
+    "eventId": "E059",
+    "timestamp": "2026-10-08T17:07:41-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER05",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 6,
+      "piece": "KNIGHT",
+      "from": "g8",
+      "to": "f6",
+      "thinkTimeSeconds": 7
+    }
+  },
+  {
+    "eventId": "E060",
+    "timestamp": "2026-10-08T17:07:44-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER07",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 6,
+      "piece": "KNIGHT",
+      "from": "g8",
+      "to": "f6",
+      "thinkTimeSeconds": 8
+    }
+  },
+  {
+    "eventId": "E061",
+    "timestamp": "2026-10-08T17:07:50-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "MOVE_PLAYED",
+    "data": {
+      "ply": 7,
+      "piece": "QUEEN",
+      "from": "h5",
+      "to": "f7",
+      "thinkTimeSeconds": 9
+    }
+  },
+  {
+    "eventId": "E062",
+    "timestamp": "2026-10-08T17:07:50-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "PIECE_CAPTURED",
+    "data": {
+      "ply": 7,
+      "capturedPiece": "PAWN"
+    }
+  },
+  {
+    "eventId": "E063",
+    "timestamp": "2026-10-08T17:07:50-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "CHECK_GIVEN",
+    "data": {
+      "ply": 7
+    }
+  },
+  {
+    "eventId": "E064",
+    "timestamp": "2026-10-08T17:07:51-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "CHECKMATE",
+    "data": {
+      "ply": 7
+    }
+  },
+  {
+    "eventId": "E065",
+    "timestamp": "2026-10-08T17:07:51-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER04",
+    "type": "MATCH_FINISHED",
+    "data": {
+      "result": "WIN",
+      "durationSeconds": 51
+    }
+  },
+  {
+    "eventId": "E066",
+    "timestamp": "2026-10-08T17:07:51-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C001",
+    "playerId": "PLAYER05",
+    "type": "MATCH_FINISHED",
+    "data": {
+      "result": "LOSS",
+      "durationSeconds": 51
+    }
+  },
+  {
+    "eventId": "E067",
+    "timestamp": "2026-10-08T17:07:52-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER06",
+    "type": "MATCH_FINISHED",
+    "data": {
+      "result": "DRAW",
+      "durationSeconds": 50
+    }
+  },
+  {
+    "eventId": "E068",
+    "timestamp": "2026-10-08T17:07:52-06:00",
+    "gameId": "CHESS",
+    "gameVersion": "1.0",
+    "matchId": "C002",
+    "playerId": "PLAYER07",
+    "type": "MATCH_FINISHED",
+    "data": {
+      "result": "DRAW",
+      "durationSeconds": 50
+    }
+  },
+  {
+    "eventId": "E069",
+    "timestamp": "2026-10-08T17:08:00-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "MATCH_STARTED",
+    "data": {
+      "rows": 2,
+      "columns": 2,
+      "pairCount": 2,
+      "timeLimitSeconds": 30
+    }
+  },
+  {
+    "eventId": "E070",
+    "timestamp": "2026-10-08T17:08:02-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "MATCH_STARTED",
+    "data": {
+      "rows": 2,
+      "columns": 2,
+      "pairCount": 2,
+      "timeLimitSeconds": 20
+    }
+  },
+  {
+    "eventId": "E071",
+    "timestamp": "2026-10-08T17:08:03-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "A1",
+      "symbol": "STAR",
+      "turn": 1
+    }
+  },
+  {
+    "eventId": "E072",
+    "timestamp": "2026-10-08T17:08:04-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "X1",
+      "symbol": "SUN",
+      "turn": 1
+    }
+  },
+  {
+    "eventId": "E073",
+    "timestamp": "2026-10-08T17:08:05-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "B1",
+      "symbol": "MOON",
+      "turn": 1
+    }
+  },
+  {
+    "eventId": "E074",
+    "timestamp": "2026-10-08T17:08:06-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "PAIR_MISMATCHED",
+    "data": {
+      "firstCardId": "A1",
+      "secondCardId": "B1",
+      "turn": 1
+    }
+  },
+  {
+    "eventId": "E075",
+    "timestamp": "2026-10-08T17:08:07-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "Y1",
+      "symbol": "CLOUD",
+      "turn": 1
+    }
+  },
+  {
+    "eventId": "E076",
+    "timestamp": "2026-10-08T17:08:08-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "PAIR_MISMATCHED",
+    "data": {
+      "firstCardId": "X1",
+      "secondCardId": "Y1",
+      "turn": 1
+    }
+  },
+  {
+    "eventId": "E077",
+    "timestamp": "2026-10-08T17:08:10-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "A2",
+      "symbol": "STAR",
+      "turn": 2
+    }
+  },
+  {
+    "eventId": "E078",
+    "timestamp": "2026-10-08T17:08:11-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "X1",
+      "symbol": "SUN",
+      "turn": 2
+    }
+  },
+  {
+    "eventId": "E079",
+    "timestamp": "2026-10-08T17:08:12-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "A1",
+      "symbol": "STAR",
+      "turn": 2
+    }
+  },
+  {
+    "eventId": "E080",
+    "timestamp": "2026-10-08T17:08:13-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "PAIR_MATCHED",
+    "data": {
+      "firstCardId": "A2",
+      "secondCardId": "A1",
+      "turn": 2
+    }
+  },
+  {
+    "eventId": "E081",
+    "timestamp": "2026-10-08T17:08:14-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "X2",
+      "symbol": "SUN",
+      "turn": 2
+    }
+  },
+  {
+    "eventId": "E082",
+    "timestamp": "2026-10-08T17:08:15-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "PAIR_MATCHED",
+    "data": {
+      "firstCardId": "X1",
+      "secondCardId": "X2",
+      "turn": 2
+    }
+  },
+  {
+    "eventId": "E083",
+    "timestamp": "2026-10-08T17:08:16-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "B1",
+      "symbol": "MOON",
+      "turn": 3
+    }
+  },
+  {
+    "eventId": "E084",
+    "timestamp": "2026-10-08T17:08:18-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "CARD_FLIPPED",
+    "data": {
+      "cardId": "B2",
+      "symbol": "MOON",
+      "turn": 3
+    }
+  },
+  {
+    "eventId": "E085",
+    "timestamp": "2026-10-08T17:08:19-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "PAIR_MATCHED",
+    "data": {
+      "firstCardId": "B1",
+      "secondCardId": "B2",
+      "turn": 3
+    }
+  },
+  {
+    "eventId": "E086",
+    "timestamp": "2026-10-08T17:08:19-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM001",
+    "playerId": "PLAYER08",
+    "type": "MATCH_FINISHED",
+    "data": {
+      "result": "WIN",
+      "durationSeconds": 19
+    }
+  },
+  {
+    "eventId": "E087",
+    "timestamp": "2026-10-08T17:08:22-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "TIME_EXPIRED",
+    "data": {
+      "pairsFound": 1
+    }
+  },
+  {
+    "eventId": "E088",
+    "timestamp": "2026-10-08T17:08:22-06:00",
+    "gameId": "MEMORY",
+    "gameVersion": "1.0",
+    "matchId": "MEM002",
+    "playerId": "PLAYER09",
+    "type": "MATCH_FINISHED",
+    "data": {
+      "result": "LOSS",
+      "durationSeconds": 20
+    }
   }
 ]

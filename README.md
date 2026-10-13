@@ -2,7 +2,7 @@
 
 [![GameStats CI/CD](https://github.com/JasonM910/GameStats/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonM910/GameStats/actions/workflows/ci.yml)
 
-GameStats procesa eventos simulados de Pacman y Buscaminas en dos etapas. Go lee
+GameStats procesa eventos simulados de Pacman, Buscaminas, Ajedrez y Memoria en dos etapas. Go lee
 `eventos.json`, valida cada evento y agrupa los válidos por partida. Scala lee
 `salida/partidas.json`, calcula estadísticas y patrones, y escribe
 `salida/resultados.json`. Ambos programas terminan después de procesar el archivo;
@@ -33,8 +33,8 @@ flowchart LR
    completo. El JSON versionado permite ejecutar y revisar cada etapa por
    separado.
 4. Scala usa `EventLoader` para leer el archivo y comprobar la versión y los
-   timestamps. `Analyzer` calcula los resultados generales; los analizadores
-   de Pacman y Buscaminas producen métricas y patrones específicos. Para
+   timestamps. `Analyzer` calcula los resultados generales de los cuatro juegos;
+   los analizadores de Pacman y Buscaminas producen métricas y patrones específicos. Para
    reglas temporales ordenan los eventos por `timestamp`. `Main` guarda el
    análisis en `resultados.json`.
 
@@ -121,9 +121,31 @@ JSON, no cadenas. Los booleanos son `true` o `false`, nunca `null`.
 | MINESWEEPER | MINE_TRIGGERED | `row`, `column`: enteros ≥ 0 |
 | MINESWEEPER | BOARD_COMPLETED | `difficulty`: texto; `durationSeconds`: entero ≥ 0 |
 | MINESWEEPER | MATCH_FINISHED | `result`: texto; `durationSeconds`: entero ≥ 0 |
+| CHESS | MATCH_STARTED | `side`: `WHITE` o `BLACK`; un evento por jugador |
+| CHESS | MOVE_PLAYED | `ply`: entero > 0; `piece`: `PAWN`, `KNIGHT`, `BISHOP`, `ROOK`, `QUEEN` o `KING`; `from`, `to`: casillas `a1`–`h8` diferentes; `thinkTimeSeconds`: entero ≥ 0 |
+| CHESS | PIECE_CAPTURED | `ply`: entero > 0; `capturedPiece`: una pieza de la lista anterior |
+| CHESS | CHECK_GIVEN | `ply`: entero > 0 |
+| CHESS | CHECKMATE | `ply`: entero > 0 |
+| CHESS | MATCH_FINISHED | `result`: `WIN`, `LOSS` o `DRAW`; `durationSeconds`: entero ≥ 0; un evento por jugador |
+| MEMORY | MATCH_STARTED | `rows`, `columns`, `pairCount`, `timeLimitSeconds`: enteros > 0 |
+| MEMORY | CARD_FLIPPED | `cardId`, `symbol`: texto; `turn`: entero > 0 |
+| MEMORY | PAIR_MATCHED | `firstCardId`, `secondCardId`: textos diferentes; `turn`: entero > 0 |
+| MEMORY | PAIR_MISMATCHED | `firstCardId`, `secondCardId`: textos diferentes; `turn`: entero > 0 |
+| MEMORY | TIME_EXPIRED | `pairsFound`: entero ≥ 0 |
+| MEMORY | MATCH_FINISHED | `result`: `WIN` o `LOSS`; `durationSeconds`: entero ≥ 0 |
 
 La validación comprueba la forma de cada evento. No verifica reglas entre
-eventos, como si una casilla pertenece al tablero de esa partida.
+eventos, como si una casilla pertenece al tablero de esa partida, si una
+jugada de ajedrez es legal o si dos cartas reveladas forman realmente un par.
+En Ajedrez, `ply` identifica cada medio movimiento: 1 es la primera jugada de
+blancas, 2 la respuesta de negras, etc. Los eventos de captura, jaque y mate
+usan el `ply` de su jugada. En Memoria, `turn` agrupa las dos cartas reveladas
+en un intento y el evento que indica si formaron pareja.
+
+`eventos.json` contiene 88 eventos de 9 partidas: 2 de Pacman, 3 de
+Buscaminas, 2 de Ajedrez y 2 de Memoria. Go conserva los dos participantes
+de cada partida de Ajedrez en `players` y procesa las partidas de Memoria como
+el resto de juegos.
 
 ## Requisitos y ejecución local
 
@@ -170,7 +192,7 @@ primero y espera a que termine correctamente antes de iniciar Scala. Ambos
 contenedores comparten la carpeta `salida/` del proyecto. La construcción de la
 imagen Scala ejecuta sus pruebas. La ejecución termina con dos archivos:
 `salida/partidas.json` y `salida/resultados.json`. Con los datos de ejemplo se
-esperan 5 partidas y 3 patrones; verificar esos números confirma que ambas
+esperan 9 partidas y 3 patrones; verificar esos números confirma que ambas
 etapas corrieron. Para retirar los contenedores terminados:
 
 ```powershell
@@ -227,6 +249,11 @@ por `timestamp`:
 Cada patrón incluye los identificadores del evento inicial y final. Un juego
 sin analizador específico conserva las estadísticas generales, pero no produce
 métricas ni patrones propios.
+
+La parte de Scala todavía tiene analizadores específicos solo para Pacman y
+Buscaminas. Ajedrez y Memoria aparecen en las estadísticas generales de
+`players`, `matches` y `games`; sus métricas y patrones específicos quedan
+pendientes en el módulo Scala.
 
 ## Pruebas e integración continua
 

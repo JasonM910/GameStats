@@ -59,7 +59,13 @@ jobs:
               resultados = json.load(source)
 
           assert partidas["schemaVersion"] == resultados["schemaVersion"] == 1
-          assert len(partidas["matches"]) == len(resultados["matches"]) > 0
+          assert len(partidas["matches"]) == len(resultados["matches"]) == 9
+          assert {m["gameId"] for m in partidas["matches"]} == {"PACMAN", "MINESWEEPER", "CHESS", "MEMORY"}
+          assert {m["gameId"] for m in resultados["matches"]} == {"PACMAN", "MINESWEEPER", "CHESS", "MEMORY"}
+          by_id = {m["matchId"]: m for m in partidas["matches"]}
+          assert by_id["C001"]["players"] == ["PLAYER04", "PLAYER05"]
+          assert by_id["MEM001"]["players"] == ["PLAYER08"]
+          assert by_id["MEM002"]["players"] == ["PLAYER09"]
           assert resultados["players"] and resultados["games"]
           assert resultados["metrics"] and resultados["patterns"]
           PY
