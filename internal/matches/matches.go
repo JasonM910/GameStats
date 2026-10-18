@@ -23,6 +23,35 @@ type worker struct {
 	input  chan events.Event
 }
 
+// Accumulator mantiene las partidas al día mientras llegan eventos del simulador.
+// Add se llama desde una sola goroutine; los generadores se comunican por channel.
+type Accumulator struct {
+	states map[string]State
+	seen   map[string]map[string]bool
+}
+
+func NewAccumulator() *Accumulator {
+	return &Accumulator{states: make(map[string]State), seen: make(map[string]map[string]bool)}
+}
+
+func (a *Accumulator) Add(item events.IndexedEvent) error {
+	event := item.Event
+	state, exists := a.states[event.MatchID]
+	if exists && state.GameID != event.GameID {
+		return fmt.Errorf("matchId %s ya pertenece al juego %s", event.MatchID, state.GameID)
+	}
+	if !exists {
+		state = State{MatchID: event.MatchID, GameID: event.GameID}
+		a.seen[event.MatchID] = make(map[string]bool)
+	}
+	addEvent(&state, event, a.seen[event.MatchID])
+	a.states[event.MatchID] = state
+	return nil
+}
+
+// States entrega el estado acumulado cuando ya terminó el stream.
+func (a *Accumulator) States() map[string]State { return a.states }
+
 // Process asigna una goroutine y un channel a cada matchId. Cada goroutine es
 // la única que modifica el estado de su partida, evitando acceso compartido.
 func Process(input []events.IndexedEvent) (map[string]State, []events.RejectedEvent) {
@@ -63,17 +92,21 @@ func collect(matchID, gameID string, input <-chan events.Event, results chan<- S
 	state := State{MatchID: matchID, GameID: gameID}
 	seenPlayers := make(map[string]bool)
 	for event := range input {
-		state.Events = append(state.Events, event)
-		if !seenPlayers[event.PlayerID] {
-			seenPlayers[event.PlayerID] = true
-			state.Players = append(state.Players, event.PlayerID)
-		}
-		switch event.Type {
-		case "MATCH_STARTED":
-			state.Started = true
-		case "MATCH_FINISHED":
-			state.Finished = true
-		}
+		addEvent(&state, event, seenPlayers)
 	}
 	results <- state
+}
+
+func addEvent(state *State, event events.Event, seenPlayers map[string]bool) {
+	state.Events = append(state.Events, event)
+	if !seenPlayers[event.PlayerID] {
+		seenPlayers[event.PlayerID] = true
+		state.Players = append(state.Players, event.PlayerID)
+	}
+	switch event.Type {
+	case "MATCH_STARTED":
+		state.Started = true
+	case "MATCH_FINISHED":
+		state.Finished = true
+	}
 }

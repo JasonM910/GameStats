@@ -1,5 +1,6 @@
 .git
 scala/
+eventos.json
 partidas.json
 salida/
 *.exe

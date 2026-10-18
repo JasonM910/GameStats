@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -8,58 +9,69 @@ import (
 	"sort"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"gamestats/internal/events"
 	"gamestats/internal/exchange"
 	"gamestats/internal/matches"
+	"gamestats/internal/simulator"
 )
 
 func main() {
-	input := flag.String("input", "eventos.json", "archivo JSON de eventos")
+	input := flag.String("input", "", "archivo JSON existente (opcional; desactiva el simulador)")
 	output := flag.String("output", "salida/partidas.json", "archivo JSON para Scala")
+	count := flag.Int("matches", 8, "cantidad de partidas simuladas")
+	seed := flag.Int64("seed", time.Now().UnixNano(), "semilla aleatoria del simulador")
+	interval := flag.Duration("interval", 100*time.Millisecond, "pausa entre eventos de una partida simulada")
 	flag.Parse()
 
-	file, err := os.Open(*input)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "No se pudo abrir %s: %v\n", *input, err)
-		os.Exit(1)
-	}
-	defer file.Close()
-	inputPath, err := filepath.Abs(*input)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Ruta de entrada inválida: %v\n", err)
-		os.Exit(1)
-	}
-	outputPath, err := filepath.Abs(*output)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Ruta de salida inválida: %v\n", err)
-		os.Exit(1)
-	}
-	if inputPath == outputPath {
-		fmt.Fprintln(os.Stderr, "La salida no puede ser el mismo archivo de entrada")
-		os.Exit(1)
-	}
-	if outputInfo, err := os.Stat(outputPath); err == nil {
-		inputInfo, err := file.Stat()
+	if *input != "" {
+		inputPath, err := filepath.Abs(*input)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "No se pudo verificar la entrada: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Ruta de entrada inválida: %v\n", err)
 			os.Exit(1)
 		}
-		if os.SameFile(inputInfo, outputInfo) {
+		outputPath, err := filepath.Abs(*output)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Ruta de salida inválida: %v\n", err)
+			os.Exit(1)
+		}
+		if inputPath == outputPath {
 			fmt.Fprintln(os.Stderr, "La salida no puede ser el mismo archivo de entrada")
 			os.Exit(1)
 		}
-	} else if !os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "No se pudo verificar la salida: %v\n", err)
-		os.Exit(1)
+		if inputInfo, err := os.Stat(inputPath); err == nil {
+			if outputInfo, err := os.Stat(outputPath); err == nil && os.SameFile(inputInfo, outputInfo) {
+				fmt.Fprintln(os.Stderr, "La salida no puede ser el mismo archivo de entrada")
+				os.Exit(1)
+			}
+		}
 	}
 
-	result, err := events.ReadAndValidate(file)
+	var result events.ReadResult
+	var states map[string]matches.State
+	var processingRejected []events.RejectedEvent
+	var err error
+	source := *input
+	if source == "" {
+		source = fmt.Sprintf("simulador (%d partidas, semilla %d, intervalo %s)", *count, *seed, *interval)
+		result, states, processingRejected, err = simulate(simulator.Options{Matches: *count, Seed: *seed, Interval: *interval})
+	} else {
+		file, openErr := os.Open(*input)
+		if openErr != nil {
+			fmt.Fprintf(os.Stderr, "No se pudo abrir %s: %v\n", *input, openErr)
+			os.Exit(1)
+		}
+		defer file.Close()
+		result, err = events.ReadAndValidate(file)
+		if err == nil {
+			states, processingRejected = matches.Process(result.Events)
+		}
+	}
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "No se pudo leer %s: %v\n", *input, err)
+		fmt.Fprintf(os.Stderr, "No se pudieron preparar los eventos: %v\n", err)
 		os.Exit(1)
 	}
-	states, processingRejected := matches.Process(result.Events)
 	rejected := append(result.Rejected, processingRejected...)
 	sort.Slice(rejected, func(i, j int) bool { return rejected[i].Index < rejected[j].Index })
 	if err := exchange.WriteFile(*output, states); err != nil {
@@ -67,7 +79,42 @@ func main() {
 		os.Exit(1)
 	}
 
-	printReport(*input, *output, result.Total, states, rejected)
+	printReport(source, *output, result.Total, states, rejected)
+}
+
+func simulate(options simulator.Options) (events.ReadResult, map[string]matches.State, []events.RejectedEvent, error) {
+	stream, errors, err := simulator.Stream(context.Background(), options)
+	if err != nil {
+		return events.ReadResult{}, nil, nil, err
+	}
+	result := events.ReadResult{}
+	seen := make(map[string]bool)
+	collector := matches.NewAccumulator()
+	var processingRejected []events.RejectedEvent
+	fmt.Println("Generando eventos de hasta dos partidas activas...")
+	for event := range stream {
+		result.Total++
+		if err := event.Validate(); err != nil {
+			result.Rejected = append(result.Rejected, events.RejectedEvent{Index: result.Total, EventID: event.EventID, Reason: err.Error()})
+			continue
+		}
+		if seen[event.EventID] {
+			result.Rejected = append(result.Rejected, events.RejectedEvent{Index: result.Total, EventID: event.EventID, Reason: "eventId duplicado"})
+			continue
+		}
+		seen[event.EventID] = true
+		if err := collector.Add(events.IndexedEvent{Index: result.Total, Event: event}); err != nil {
+			processingRejected = append(processingRejected, events.RejectedEvent{Index: result.Total, EventID: event.EventID, Reason: err.Error()})
+			continue
+		}
+		fmt.Printf("  %-7s %-10s %-18s %s\n", event.MatchID, event.GameID, event.Type, event.PlayerID)
+	}
+	for err := range errors {
+		if err != nil {
+			return result, nil, processingRejected, err
+		}
+	}
+	return result, collector.States(), processingRejected, nil
 }
 
 func printReport(input, output string, total int, states map[string]matches.State, rejected []events.RejectedEvent) {

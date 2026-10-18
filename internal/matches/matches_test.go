@@ -39,6 +39,32 @@ func TestProcessInterleavedMatches(t *testing.T) {
 	}
 }
 
+func TestAccumulatorUpdatesMatchesAsEventsArrive(t *testing.T) {
+	collector := NewAccumulator()
+	for _, item := range []events.IndexedEvent{
+		indexed(1, "E1", "PACMAN", "P1", "PLAYER1", "MATCH_STARTED"),
+		indexed(2, "E2", "MINESWEEPER", "M1", "PLAYER2", "MATCH_STARTED"),
+		indexed(3, "E3", "PACMAN", "P1", "PLAYER1", "PELLET_EATEN"),
+	} {
+		if err := collector.Add(item); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(collector.States()) != 2 || len(collector.States()["P1"].Events) != 2 || collector.States()["P1"].Finished {
+		t.Fatalf("estado parcial incorrecto: %+v", collector.States())
+	}
+	if err := collector.Add(indexed(4, "E4", "MINESWEEPER", "P1", "PLAYER2", "MATCH_FINISHED")); err == nil {
+		t.Fatal("aceptó un juego diferente para P1")
+	}
+	if err := collector.Add(indexed(5, "E5", "PACMAN", "P1", "PLAYER1", "MATCH_FINISHED")); err != nil {
+		t.Fatal(err)
+	}
+	state := collector.States()["P1"]
+	if !state.Started || !state.Finished || len(state.Events) != 3 || !reflect.DeepEqual(state.Players, []string{"PLAYER1"}) {
+		t.Fatalf("estado final incorrecto: %+v", state)
+	}
+}
+
 func TestProcessRejectsGameConflict(t *testing.T) {
 	input := []events.IndexedEvent{
 		indexed(1, "E1", "PACMAN", "P1", "PLAYER1", "MATCH_STARTED"),

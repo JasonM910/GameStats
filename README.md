@@ -2,31 +2,21 @@
 
 [![GameStats CI/CD](https://github.com/JasonM910/GameStats/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonM910/GameStats/actions/workflows/ci.yml)
 
-GameStats procesa eventos simulados de Pacman, Buscaminas, Ajedrez y Memoria en dos etapas. Go lee
-`eventos.json`, valida cada evento y agrupa los válidos por partida. Scala lee
-`salida/partidas.json`, calcula estadísticas y patrones, y escribe
-`salida/resultados.json`. Ambos programas terminan después de procesar el archivo;
-no son servidores HTTP.
+GameStats procesa partidas simuladas de Pacman, Buscaminas, Ajedrez y Memoria en dos etapas. Go genera eventos gradualmente para un máximo de dos partidas activas, valida cada evento y agrupa los válidos por partida. Al terminar escribe `salida/partidas.json`. Scala lee ese archivo, calcula estadísticas y patrones, y escribe `salida/resultados.json`. Ambos programas terminan después de completar el lote; no son servidores HTTP.
 
 ## Arquitectura
 
 ```mermaid
 flowchart LR
-    A["eventos.json<br/>simulador"] --> B["Go<br/>lectura y validación"]
-    B --> C["Goroutine y channel<br/>por matchId"]
+    A["Simulador Go<br/>máximo 2 partidas activas"] --> B["Go<br/>generación y validación"]
+    B --> C["Estado temporal<br/>por matchId"]
     C --> D["salida/partidas.json<br/>schemaVersion 1"]
     D --> E["Scala<br/>estadísticas y patrones"]
     E --> F["salida/resultados.json"]
 ```
 
-1. `main.go` abre el arreglo de eventos. `internal/events` convierte cada objeto
-   en `Event`, valida los campos comunes y el `data` del tipo de evento, y
-   rechaza los `eventId` duplicados. Los errores de objetos individuales se
-   informan en stderr; los eventos válidos siguen adelante.
-2. `internal/matches` asigna una goroutine y un channel a cada `matchId`. Solo
-   esa goroutine modifica el estado de la partida: juego, jugadores únicos,
-   eventos en orden de llegada y marcas de inicio y fin. Si un `matchId`
-   aparece con otro juego, el evento se rechaza.
+1. `internal/simulator` crea partidas de los cuatro juegos con una semilla aleatoria. Dos goroutines toman partidas de una cola y emiten eventos por un channel, uno a uno y con una pausa configurable. `main.go` valida cada `Event` con `internal/events` y rechaza identificadores duplicados. Los errores se informan en stderr.
+2. `internal/matches` actualiza el estado de cada `matchId` conforme llegan los eventos simulados: juego, jugadores únicos, eventos en orden de llegada y marcas de inicio y fin. El consumidor del channel es el único que modifica estos estados. Si un `matchId` aparece con otro juego, el evento se rechaza. Para reproducir `-input`, el procesador anterior sigue usando una goroutine y un channel por partida.
 3. `internal/exchange` ordena las partidas por `matchId`, conserva el orden de
    sus eventos y escribe `partidas.json` con `schemaVersion: 1`. Primero escribe
    un archivo temporal y luego lo renombra, para que Scala reciba el archivo
@@ -38,10 +28,7 @@ flowchart LR
    reglas temporales ordenan los eventos por `timestamp`. `Main` guarda el
    análisis en `resultados.json`.
 
-La comunicación es un archivo JSON compartido porque cada programa procesa un
-lote y termina. Docker Compose espera a que Go finalice correctamente antes de
-iniciar Scala. El contrato que comparten ambos módulos se describe a
-continuación.
+La comunicación sigue siendo un archivo JSON compartido. Docker Compose espera a que Go finalice correctamente antes de iniciar Scala. El contrato que comparten ambos módulos se describe a continuación.
 
 ## Contrato de intercambio Go → Scala
 
@@ -142,10 +129,18 @@ blancas, 2 la respuesta de negras, etc. Los eventos de captura, jaque y mate
 usan el `ply` de su jugada. En Memoria, `turn` agrupa las dos cartas reveladas
 en un intento y el evento que indica si formaron pareja.
 
-`eventos.json` contiene 88 eventos de 9 partidas: 2 de Pacman, 3 de
-Buscaminas, 2 de Ajedrez y 2 de Memoria. Go conserva los dos participantes
-de cada partida de Ajedrez en `players` y procesa las partidas de Memoria como
-el resto de juegos.
+`eventos.json` queda como muestra histórica y caso de prueba opcional. La ejecución normal genera partidas nuevas sin leerlo. El simulador conserva dos participantes en Ajedrez y un participante por partida en los demás juegos.
+
+### Simulación de partidas en Go
+
+Por defecto, `go run .` genera ocho partidas: dos de cada juego, en orden aleatorio. Hay **como máximo dos partidas activas simultáneamente**. Cada trabajador genera los eventos de su partida paso a paso, espera `100ms` entre eventos y libera su puesto al terminar; entonces empieza la siguiente. El progreso aparece en consola. Los `matchId` y `eventId` son únicos dentro de la ejecución. `-seed` permite repetir las decisiones aleatorias; sin esa opción se usa una semilla nueva.
+
+- Pacman genera puntos, frutas, poderes y pérdidas de vida; gana al completar el nivel o pierde al agotar las vidas.
+- Buscaminas coloca tres minas en un tablero de 4×4, calcula pistas según sus posiciones, revela casillas seguras y termina al limpiar el tablero o activar una mina.
+- Ajedrez elige aleatoriamente entre tres líneas de jugadas legales (mate del pastor, mate del loco o tablas por acuerdo). Genera inicio y resultado para ambos jugadores.
+- Memoria mezcla tres parejas reales de cartas, voltea dos cartas por intento y emite `PAIR_MATCHED` o `PAIR_MISMATCHED` según sus símbolos. Termina al encontrar todos los pares o al agotarse el tiempo.
+
+Go entrega a Scala un **archivo completo** cuando todas las partidas simuladas terminan. La generación es gradual dentro de Go; Scala mantiene por ahora el procesamiento por lote.
 
 ## Requisitos y ejecución local
 
@@ -161,7 +156,7 @@ cd ..
 Get-Content -Raw salida/resultados.json
 ```
 
-Go acepta `-input ruta/al/eventos.json` y `-output ruta/al/partidas.json`. Scala
+Go acepta `-matches 8`, `-seed 42`, `-interval 100ms` y `-output ruta/al/partidas.json`. `-input ruta/al/eventos.json` es una opción para reproducir datos existentes y desactiva el simulador. Scala
 acepta como primer argumento la ruta del archivo preparado por Go. También se
 pueden definir `GAMESTATS_INPUT` y `GAMESTATS_OUTPUT`; sin una ruta de salida,
 Scala escribe `resultados.json` junto al archivo de entrada.
@@ -191,9 +186,7 @@ $resultado.patterns.Count
 primero y espera a que termine correctamente antes de iniciar Scala. Ambos
 contenedores comparten la carpeta `salida/` del proyecto. La construcción de la
 imagen Scala ejecuta sus pruebas. La ejecución termina con dos archivos:
-`salida/partidas.json` y `salida/resultados.json`. Con los datos de ejemplo se
-esperan 9 partidas, 32 métricas y 8 patrones; verificar esos números confirma que ambas
-etapas corrieron. Para retirar los contenedores terminados:
+`salida/partidas.json` y `salida/resultados.json`. Con la configuración normal se esperan ocho partidas, dos por juego. Las métricas y los patrones varían con las decisiones aleatorias. Para retirar los contenedores terminados:
 
 ```powershell
 docker compose down
@@ -260,9 +253,7 @@ Cada patrón incluye los identificadores del evento inicial y final. Un juego
 sin analizador específico conserva las estadísticas generales, pero no produce
 métricas ni patrones propios.
 
-Los cuatro juegos producen estadísticas generales y métricas propias. Los datos
-de ejemplo incluyen una partida multijugador de Ajedrez con ganador y perdedor,
-otra en empate y dos partidas de Memoria con resultados diferentes.
+Los cuatro juegos producen estadísticas generales y métricas propias. La simulación puede producir resultados y patrones diferentes en cada ejecución; con `-seed` se puede repetir una ejecución concreta.
 
 ## Pruebas e integración continua
 
@@ -275,6 +266,6 @@ sbt test
 En Windows, `go test -race ./...` requiere CGO y un compilador C. El flujo de
 [GitHub Actions](.github/workflows/ci.yml) ejecuta pruebas Go con detector de
 carreras, `go vet`, compila Go, construye las dos imágenes Docker y ejecuta las
-pruebas Scala durante su construcción. Luego procesa el archivo de ejemplo de
-Go a Scala y verifica la estructura de `resultados.json`. Publica como artefacto
-la imagen de Go y los dos JSON de ejemplo; no despliega servicios.
+pruebas Scala durante su construcción. Luego ejecuta una simulación reproducible
+de Go a Scala y verifica la estructura de `resultados.json`. Publica como artefacto
+la imagen de Go y los dos JSON generados; no despliega servicios.

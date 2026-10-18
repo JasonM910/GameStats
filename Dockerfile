@@ -11,6 +11,5 @@ FROM scratch
 
 WORKDIR /app
 COPY --from=build /gamestats /app/gamestats
-COPY eventos.json /app/eventos.json
 
 ENTRYPOINT ["/app/gamestats"]
