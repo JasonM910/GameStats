@@ -8,6 +8,11 @@ object EventLoader {
   def load(path: os.Path): Either[String, PartidasFile] =
     for {
       content <- readFile(path)
+      valid <- fromJson(content)
+    } yield valid
+
+  def fromJson(content: String): Either[String, PartidasFile] =
+    for {
       parsed  <- parse(content)
       versioned <- validateVersion(parsed)
       valid   <- validateTimestamps(versioned)

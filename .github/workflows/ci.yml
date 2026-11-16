@@ -79,3 +79,28 @@ jobs:
           path: ${{ runner.temp }}/gamestats-artifacts/
           retention-days: 7
           if-no-files-found: error
+      - name: Start HTTP services with persistent JSON
+        run: |
+          docker network create gamestats-ci
+          docker run -d --name gamestats-analyzer --network gamestats-ci gamestats-scala:ci --serve
+          docker run -d --name gamestats-api --network gamestats-ci \
+            -p 127.0.0.1:8080:8080 \
+            -e GAMESTATS_ANALYZER_URL=http://gamestats-analyzer:8081/analyze \
+            -e GAMESTATS_DATA=/output/api/partidas.json \
+            --mount "type=bind,source=$RUNNER_TEMP/gamestats-output,target=/output" \
+            gamestats-go:ci -serve
+      - name: Validate API and restart persistence
+        run: |
+          python3 demo/check_api.py http://127.0.0.1:8080 "$RUNNER_TEMP/gamestats-output/partidas.json"
+          docker restart gamestats-api
+          python3 demo/check_api.py http://127.0.0.1:8080 "$RUNNER_TEMP/gamestats-output/partidas.json"
+      - name: API logs
+        if: failure()
+        run: |
+          docker logs gamestats-api || true
+          docker logs gamestats-analyzer || true
+      - name: Stop HTTP services
+        if: always()
+        run: |
+          docker rm -f gamestats-api gamestats-analyzer || true
+          docker network rm gamestats-ci || true

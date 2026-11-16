@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -11,6 +12,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"gamestats/internal/api"
 	"gamestats/internal/events"
 	"gamestats/internal/exchange"
 	"gamestats/internal/matches"
@@ -18,12 +20,44 @@ import (
 )
 
 func main() {
+	healthcheck := flag.Bool("healthcheck", false, "comprobar disponibilidad de API y Scala")
+	serve := flag.Bool("serve", false, "iniciar API HTTP (el modo por lotes sigue siendo el predeterminado)")
+	listen := flag.String("listen", envOr("GAMESTATS_LISTEN", ":8080"), "dirección de escucha HTTP")
+	dataPath := flag.String("data", envOr("GAMESTATS_DATA", "salida/api/partidas.json"), "histórico JSON de la API")
+	analyzerURL := flag.String("analyzer-url", envOr("GAMESTATS_ANALYZER_URL", "http://localhost:8081/analyze"), "analizador Scala")
 	input := flag.String("input", "", "archivo JSON existente (opcional; desactiva el simulador)")
 	output := flag.String("output", "salida/partidas.json", "archivo JSON para Scala")
 	count := flag.Int("matches", 8, "cantidad de partidas simuladas")
 	seed := flag.Int64("seed", time.Now().UnixNano(), "semilla aleatoria del simulador")
 	interval := flag.Duration("interval", 100*time.Millisecond, "pausa entre eventos de una partida simulada")
 	flag.Parse()
+	if *healthcheck {
+		client := http.Client{Timeout: 4 * time.Second}
+		response, err := client.Get("http://127.0.0.1:8080/health")
+		if err != nil {
+			os.Exit(1)
+		}
+		response.Body.Close()
+		if response.StatusCode != http.StatusOK {
+			os.Exit(1)
+		}
+		return
+	}
+	if *serve {
+		store, err := api.OpenStore(*dataPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		handler := api.NewServer(store, *analyzerURL, os.Getenv("GAMESTATS_CORS_ORIGIN"), filepath.Join(filepath.Dir(*dataPath), "resultados.json"))
+		server := &http.Server{Addr: *listen, Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 20 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second}
+		fmt.Printf("GameStats API en %s; histórico %s\n", *listen, *dataPath)
+		if err := server.ListenAndServe(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	if *input != "" {
 		inputPath, err := filepath.Abs(*input)
@@ -80,6 +114,13 @@ func main() {
 	}
 
 	printReport(source, *output, result.Total, states, rejected)
+}
+
+func envOr(name, fallback string) string {
+	if value := os.Getenv(name); value != "" {
+		return value
+	}
+	return fallback
 }
 
 func simulate(options simulator.Options) (events.ReadResult, map[string]matches.State, []events.RejectedEvent, error) {

@@ -2,7 +2,7 @@
 
 [![GameStats CI/CD](https://github.com/JasonM910/GameStats/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonM910/GameStats/actions/workflows/ci.yml)
 
-GameStats procesa partidas simuladas de Pacman, Buscaminas, Ajedrez y Memoria en dos etapas. Go genera eventos gradualmente para un máximo de dos partidas activas, valida cada evento y agrupa los válidos por partida. Al terminar escribe `salida/partidas.json`. Scala lee ese archivo, calcula estadísticas y patrones, y escribe `salida/resultados.json`. Ambos programas terminan después de completar el lote; no son servidores HTTP.
+GameStats procesa partidas de Pacman, Buscaminas, Ajedrez y Memoria en dos etapas. En el modo por lotes original, Go genera eventos gradualmente para un máximo de dos partidas activas, valida cada evento y agrupa los válidos por partida. Al terminar escribe `salida/partidas.json`. Scala lee ese archivo, calcula estadísticas y patrones, y escribe `salida/resultados.json`. Ambos programas terminan después de completar el lote. Ahora existe además un modo HTTP opcional para GameConsole, descrito al final; el procesamiento por archivos y sus formatos permanecen disponibles.
 
 ## Arquitectura
 
@@ -28,7 +28,7 @@ flowchart LR
    reglas temporales ordenan los eventos por `timestamp`. `Main` guarda el
    análisis en `resultados.json`.
 
-La comunicación sigue siendo un archivo JSON compartido. Docker Compose espera a que Go finalice correctamente antes de iniciar Scala. El contrato que comparten ambos módulos se describe a continuación.
+En el modo por lotes la comunicación sigue siendo un archivo JSON compartido. El Docker Compose de este repositorio espera a que Go finalice correctamente antes de iniciar Scala. El contrato que comparten ambos módulos se describe a continuación.
 
 ## Contrato de intercambio Go → Scala
 
@@ -269,3 +269,143 @@ carreras, `go vet`, compila Go, construye las dos imágenes Docker y ejecuta las
 pruebas Scala durante su construcción. Luego ejecuta una simulación reproducible
 de Go a Scala y verifica la estructura de `resultados.json`. Publica como artefacto
 la imagen de Go y los dos JSON generados; no despliega servicios.
+
+## API HTTP opcional para GameConsole
+
+El modo por archivos anterior sigue siendo el predeterminado. La API agrega
+transporte a la validación Go y al `Analyzer` Scala existentes; no introduce una
+base de datos ni un segundo cálculo de estadísticas. Los adaptadores HTTP usan
+las bibliotecas estándar de [Go](https://pkg.go.dev/net/http) y
+[Java 21](https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpServer.html).
+
+```mermaid
+flowchart LR
+    Console[GameConsole] -->|POST /api/events| API[Go: validación y deduplicación]
+    API --> JSON[partidas.json schemaVersion 1]
+    Console -->|GET /api/stats| API
+    API -->|Documento JSON filtrado| Scala[Scala: mismo Analyzer]
+    Scala --> API
+    API --> Results[resultados.json]
+```
+
+Ejecución local en terminales separadas:
+
+```powershell
+# Desde GameStats/scala
+sbt "runMain AnalysisServer"
+
+# Desde GameStats
+go run . -serve
+```
+
+Go escucha en 8080 y Scala en 8081. Desde el repositorio hermano `GameConsole`,
+`docker compose up --build -d --wait` inicia Nginx, Go y Scala y publica la consola
+en http://localhost:8088. El Compose de este repositorio continúa siendo el del
+flujo por lotes y puede usarse independientemente.
+
+| Método y endpoint | Comportamiento |
+| --- | --- |
+| `POST /api/events` | Arreglo JSON de 1 a 500 eventos; máximo 1 MiB. Valida el catálogo original y la secuencia de inicio/final por jugador. Guarda todo el lote antes de confirmar. |
+| `GET /api/stats` | Analiza el histórico actual con Scala y devuelve `AnalysisResult` sin alterar el esquema original. |
+| `GET /api/stats?gameId=PACMAN&playerId=PLAYER_ONE` | Selecciona partidas por juego y/o jugador antes de analizarlas; conserva ambos jugadores de Ajedrez para no alterar sus resultados. |
+| `GET /health` | Comprueba disponibilidad de Go y del servicio Scala. Devuelve 503 si falta Scala. |
+
+Una recepción correcta responde HTTP 200:
+
+```json
+{"status":"accepted","eventIds":["E001","E002"]}
+```
+
+Reenviar el mismo `eventId` y contenido es idempotente, incluso después de
+reiniciar Go. Otro contenido con ese ID, cambiar de juego dentro del mismo
+`matchId`, repetir inicio/final con otro ID o agregar eventos tras el resultado
+del jugador produce 409. Las repeticiones idénticas se reconocen antes de
+validar la secuencia para permitir reintentar también partidas terminadas.
+El almacenamiento y las peticiones concurrentes se coordinan con un mutex;
+no ejecutar dos instancias escritoras sobre el mismo archivo.
+
+Errores estructurados:
+
+```json
+{"error":{"code":"invalid_events","message":"falta eventId o está vacío"}}
+```
+
+Los códigos HTTP incluyen 400 (JSON/datos/filtros inválidos), 404 (ruta),
+405 (método), 409 (conflicto), 413 (tamaño), 415 (Content-Type), 500
+(persistencia), 502 (respuesta inválida de Scala) y 503 (Scala no disponible).
+La validación de datos reutiliza `Event.Validate`; las comprobaciones de
+secuencia son adicionales para la API y no cambian la tolerancia del lector
+histórico. No se validan en el servidor las reglas completas del tablero.
+
+### Persistencia y coexistencia con archivos
+
+La API usa por defecto `salida/api/partidas.json`, separado de
+`salida/partidas.json` del simulador. Recupera los eventos al arrancar y conserva
+los identificadores originales. Cada escritura publica un documento completo
+mediante archivo temporal y renombrado, utilizando `internal/exchange`.
+Un histórico inválido impide iniciar la API; no se borra ni sustituye.
+
+El análisis ocurre al consultar estadísticas, sobre una instantánea del
+histórico. Una consulta sin filtros publica `resultados.json` junto a ese
+histórico; las consultas filtradas no sobrescriben los resultados globales.
+Si Scala falla, los eventos permanecen almacenados y la consulta informa el
+error; no se presentan resultados antiguos como si fueran actuales.
+
+Los archivos de la API pueden procesarse con el CLI Scala original:
+
+```powershell
+cd scala
+sbt "run ../salida/api/partidas.json"
+```
+
+Para incorporar un archivo histórico, elegir **una copia** de un documento
+`partidas.json` generado por Go como `GAMESTATS_DATA` antes de arrancar. Los
+arreglos históricos como `eventos.json` se convierten con el flujo original:
+
+```powershell
+go run . -input eventos.json -output salida/importacion/partidas.json
+go run . -serve -data salida/importacion/partidas.json
+```
+
+No ejecutar el simulador escribiendo sobre el mismo archivo que está usando
+la API. La versión de esquema y el catálogo originales no cambian. Compose
+integrado guarda el histórico en el volumen `gamestats-data`; reiniciar o
+recrear contenedores lo conserva. Hacer respaldo de ambos JSON del volumen
+para trasladar el historial a otro equipo.
+
+### Variables del modo HTTP
+
+| Variable | Valor predeterminado | Uso |
+| --- | --- | --- |
+| `GAMESTATS_LISTEN` | `:8080` | Dirección de Go; también `-listen`. |
+| `GAMESTATS_DATA` | `salida/api/partidas.json` | Histórico de la API; también `-data`. |
+| `GAMESTATS_ANALYZER_URL` | `http://localhost:8081/analyze` | Servicio interno Scala; también `-analyzer-url`. |
+| `GAMESTATS_CORS_ORIGIN` | Vacío | Origen adicional permitido para acceso directo desde navegador. El proxy de GameConsole evita necesitar CORS. |
+| `GAMESTATS_ANALYZER_PORT` | `8081` | Puerto de `AnalysisServer`. |
+
+La imagen Scala ejecuta `java -cp /app/lib/* Main`; sin argumentos mantiene el
+procesamiento de archivos y con `--serve` inicia HTTP. Se construye con sbt y
+las dependencias actuales, y su runtime contiene Java 21, sin sbt. No se añade
+un framework HTTP. `go run . -healthcheck` comprueba Go/Scala en el puerto 8080
+y permite verificar disponibilidad desde el contenedor Go sin instalar curl.
+
+### Pruebas y CI del modo HTTP
+
+`go test ./...` incluye validación, atomicidad de lotes, idempotencia,
+concurrencia, restauración del histórico, filtros y fallos del analizador.
+`sbt test` compara la salida HTTP con el análisis del mismo documento por
+archivo y mantiene las pruebas originales. El workflow existente además inicia
+ambas imágenes como servicios, envía eventos del simulador dos veces, consulta
+métricas, reinicia Go y repite la validación de persistencia con
+`demo/check_api.py`.
+
+El repositorio hermano GameConsole añade un smoke test que genera eventos desde
+las clases de sus tres juegos, los entrega a Go y comprueba resultados Scala.
+Su workflow recibe la rama/commit compatible de este repositorio mediante
+`GAMESTATS_REF`; coordinar ambas ramas antes de ejecutarlo en GitHub.
+
+El deployment definido continúa siendo Docker Compose; los workflows prueban
+y entregan artefactos. No se publica automáticamente un servicio remoto sin
+un destino y credenciales configurados. La API actual es una integración local
+sin cuentas ni autenticación; para publicarla se debe configurar el acceso y
+HTTPS del entorno de despliegue.

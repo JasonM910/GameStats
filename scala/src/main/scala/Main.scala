@@ -15,6 +15,10 @@ object Main {
       .getOrElse(entrada / os.up / "resultados.json")
 
   def main(args: Array[String]): Unit = {
+    if (args.headOption.contains("--serve")) {
+      AnalysisServer.main(args.drop(1))
+      return
+    }
     val entrada = resolverEntrada(args)
 
     EventLoader.load(entrada) match {
