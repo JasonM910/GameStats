@@ -400,7 +400,8 @@ métricas, reinicia Go y repite la validación de persistencia con
 `demo/check_api.py`.
 
 El repositorio hermano GameConsole añade un smoke test que genera eventos desde
-las clases de sus tres juegos, los entrega a Go y comprueba resultados Scala.
+las clases de sus cuatro juegos, los entrega a Go y comprueba resultados Scala,
+incluyendo casillas reveladas, precisión de banderas y correcciones en Buscaminas.
 Su workflow recibe la rama/commit compatible de este repositorio mediante
 `GAMESTATS_REF`; coordinar ambas ramas antes de ejecutarlo en GitHub.
 
