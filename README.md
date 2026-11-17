@@ -272,6 +272,8 @@ la imagen de Go y los dos JSON generados; no despliega servicios.
 
 ## API HTTP opcional para GameConsole
 
+GameConsole integra también un servicio SWI-Prolog para decidir jugadas de Ajedrez. Esa API de decisiones pertenece a la consola; los eventos de la persona y de `PROLOG` llegan a Go con el mismo contrato CHESS. Scala calcula sus métricas y resultados como los de cualquier otro jugador. Las partidas simultáneas conservan UUID separados y pueden consultarse en curso desde el panel. El Compose de GameConsole levanta los cuatro servicios; la [guía de demostración](../GameConsole/docs/demostracion.md) describe el algoritmo, las sesiones entre pestañas y las pruebas integradas.
+
 El modo por archivos anterior sigue siendo el predeterminado. La API agrega
 transporte a la validación Go y al `Analyzer` Scala existentes; no introduce una
 base de datos ni un segundo cálculo de estadísticas. Los adaptadores HTTP usan
